@@ -29,19 +29,58 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Search for medicine in database by name, generic name, or barcode
+    // Clean medicine name: remove dosage, forms, and extra text
+    const cleanName = medicineName
+      .replace(/\d+\s*(mg|g|ml|mcg|iu|tablets?|capsules?|x)/gi, '')
+      .replace(/\(.*?\)/g, '') // Remove text in parentheses
+      .replace(/\b(tablets?|capsules?|syrup|injection|ip|bp|usp)\b/gi, '')
+      .trim()
+      .split(/\s+/)
+      .filter((word: string) => word.length > 2) // Filter out short words
+      .join(' ');
+
+    console.log("Cleaned medicine name:", cleanName);
+
+    if (!cleanName || cleanName.length < 3) {
+      console.log("Medicine name too short after cleaning, skipping");
+      return new Response(
+        JSON.stringify({
+          found: false,
+          verified: false,
+          message: "Invalid medicine name",
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Search for medicine in database by name or generic name
     const { data: medicines, error: searchError } = await supabase
       .from('medicines')
       .select('*')
-      .or(`name.ilike.%${medicineName}%,generic_name.ilike.%${medicineName}%,barcode.eq.${medicineName}`)
-      .limit(1);
+      .or(`name.ilike.%${cleanName}%,generic_name.ilike.%${cleanName}%`)
+      .limit(5);
 
     if (searchError) {
       console.error('Database search error:', searchError);
       throw new Error('Failed to search medicines database');
     }
 
-    const foundMedicine = medicines && medicines.length > 0 ? medicines[0] : null;
+    // Find best match using fuzzy matching
+    let foundMedicine = null;
+    if (medicines && medicines.length > 0) {
+      // Try exact match first
+      foundMedicine = medicines.find(m => 
+        m.name.toLowerCase() === cleanName.toLowerCase() ||
+        m.generic_name.toLowerCase() === cleanName.toLowerCase()
+      );
+      
+      // If no exact match, use first partial match
+      if (!foundMedicine) {
+        foundMedicine = medicines[0];
+      }
+      
+      console.log("Found medicine:", foundMedicine?.name);
+    }
 
     if (foundMedicine) {
       // Medicine found in DRAP - store verification history
