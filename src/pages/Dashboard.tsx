@@ -59,11 +59,32 @@ const Dashboard = () => {
     setVerificationResults([]);
 
     try {
-      // Simulate OCR processing - In production, integrate with OCR API like Tesseract OCR API or Google Vision
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(uploadedFile);
       
-      // Demo extracted text - this would come from actual OCR
-      const extractedText = "Paracetamol 500mg\nBrufen 400mg\nAugmentin 625mg";
+      const imageBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+
+      // Call OCR edge function
+      const { data: ocrData, error: ocrError } = await supabase.functions.invoke('ocr-extract', {
+        body: { imageBase64 }
+      });
+
+      if (ocrError) {
+        console.error('OCR error:', ocrError);
+        toast({
+          title: "OCR Failed",
+          description: "Could not extract text from image",
+          variant: "destructive",
+        });
+        setIsScanning(false);
+        return;
+      }
+
+      const extractedText = ocrData?.extractedText || '';
       
       if (!extractedText) {
         toast({
