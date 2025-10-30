@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Camera, Shield, AlertTriangle, CheckCircle } from "lucide-react";
+import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -47,24 +48,49 @@ const Dashboard = () => {
       description: "Checking medicines against DRAP database",
     });
 
-    // TODO: Replace with actual API call
-    setTimeout(() => {
-      const mockResults = [
-        {
-          name: "Paracetamol 500mg",
-          status: "verified",
-          registered: true,
-          manufacturer: "GSK Pakistan",
-          registration_no: "054321",
-        },
-      ];
-      setVerificationResults(mockResults);
+    try {
+      // Extract medicine names from OCR text (simple extraction for demo)
+      const medicines = ocrText.split(',').map(m => m.trim());
+      const results = [];
+
+      for (const medicine of medicines) {
+        const { data, error } = await supabase.functions.invoke('verify-medicine', {
+          body: { medicineName: medicine }
+        });
+
+        if (error) {
+          console.error('Error verifying medicine:', error);
+          results.push({
+            name: medicine,
+            status: "error",
+            registered: false,
+            error: "Failed to verify",
+          });
+        } else {
+          results.push({
+            name: medicine,
+            status: data.found ? "verified" : "not_found",
+            registered: data.verified,
+            ...data,
+          });
+        }
+      }
+
+      setVerificationResults(results);
       setIsVerifying(false);
       toast({
         title: "Verification complete",
-        description: "Medicine authenticity check finished",
+        description: `Checked ${results.length} medicine(s)`,
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Verification error:', error);
+      setIsVerifying(false);
+      toast({
+        title: "Verification failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -180,19 +206,98 @@ const Dashboard = () => {
               ) : verificationResults.length > 0 ? (
                 <div className="space-y-4">
                   {verificationResults.map((result, idx) => (
-                    <div key={idx} className="p-4 bg-muted rounded-lg space-y-2">
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-semibold">{result.name}</h3>
-                        {result.registered ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                    <div key={idx} className="border rounded-lg overflow-hidden">
+                      <div className="p-4 bg-muted space-y-3">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold text-lg">{result.name}</h3>
+                          {result.registered ? (
+                            <CheckCircle className="h-6 w-6 text-green-600" />
+                          ) : (
+                            <AlertTriangle className="h-6 w-6 text-yellow-600" />
+                          )}
+                        </div>
+
+                        {result.found && result.medicine && (
+                          <div className="space-y-2 text-sm">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <span className="font-medium">Generic:</span>
+                                <p className="text-muted-foreground">{result.medicine.generic_name}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Dosage:</span>
+                                <p className="text-muted-foreground">{result.medicine.dosage}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Form:</span>
+                                <p className="text-muted-foreground">{result.medicine.form}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Safety Score:</span>
+                                <p className="text-muted-foreground">{result.medicine.safety_score}/100</p>
+                              </div>
+                            </div>
+                            <div>
+                              <span className="font-medium">Manufacturer:</span>
+                              <p className="text-muted-foreground">{result.medicine.manufacturer}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">Registration:</span>
+                              <p className="text-muted-foreground">{result.medicine.registration_no}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">Indications:</span>
+                              <p className="text-muted-foreground">{result.medicine.indications}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">Side Effects:</span>
+                              <p className="text-muted-foreground">{result.medicine.side_effects}</p>
+                            </div>
+                          </div>
                         )}
-                      </div>
-                      <div className="text-sm space-y-1">
-                        <p><span className="font-medium">Status:</span> {result.status}</p>
-                        <p><span className="font-medium">Manufacturer:</span> {result.manufacturer}</p>
-                        <p><span className="font-medium">Registration:</span> {result.registration_no}</p>
+
+                        {!result.found && (
+                          <div className="space-y-3">
+                            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+                              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                ⚠️ Not found in DRAP database
+                              </p>
+                            </div>
+
+                            {result.ai_analysis && (
+                              <div className="space-y-2">
+                                <p className="font-medium text-sm">AI Analysis:</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                                  {result.ai_analysis}
+                                </p>
+                              </div>
+                            )}
+
+                            {result.alternatives && result.alternatives.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="font-medium text-sm flex items-center gap-2">
+                                  <Pill className="h-4 w-4" />
+                                  Suggested Alternatives:
+                                </p>
+                                <div className="space-y-2">
+                                  {result.alternatives.map((alt: any, altIdx: number) => (
+                                    <div key={altIdx} className="p-3 bg-background rounded-md border">
+                                      <div className="flex items-start justify-between mb-1">
+                                        <p className="font-medium text-sm">{alt.name}</p>
+                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                                          Score: {alt.safety_score}/100
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">
+                                        {alt.generic_name} - {alt.manufacturer}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
