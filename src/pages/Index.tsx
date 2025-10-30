@@ -12,7 +12,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <img src={logo} alt="RxAegis" className="h-16 sm:h-20 md:h-24 mx-auto mb-6 sm:mb-8 object-contain" />
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-primary bg-clip-text text-transparent px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-foreground px-4">
               Verify Your Medicines with Confidence
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
