@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.77.0";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.77.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { medicineName, userId } = await req.json();
+    const { medicineName, userId, extractedText } = await req.json();
     
     if (!medicineName) {
       return new Response(
@@ -29,60 +29,61 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check if medicine exists in DRAP database
-    const { data: medicines, error: dbError } = await supabase
+    // Search for medicine in database by name, generic name, or barcode
+    const { data: medicines, error: searchError } = await supabase
       .from('medicines')
       .select('*')
-      .or(`name.ilike.%${medicineName}%,generic_name.ilike.%${medicineName}%`)
+      .or(`name.ilike.%${medicineName}%,generic_name.ilike.%${medicineName}%,barcode.eq.${medicineName}`)
       .limit(1);
 
-    if (dbError) {
-      console.error('Database error:', dbError);
-      throw new Error('Failed to query medicines database');
+    if (searchError) {
+      console.error('Database search error:', searchError);
+      throw new Error('Failed to search medicines database');
     }
 
-    let verificationResult;
-    
-    if (medicines && medicines.length > 0) {
-      const foundMedicine = medicines[0];
-      
-      // Calculate safety score based on side effects
-      const safetyScore = Math.max(70, 100 - (foundMedicine.side_effects?.length || 0) * 5);
-      
-      verificationResult = {
-        found: true,
-        verified: true,
-        medicine: {
-          name: foundMedicine.name,
-          generic_name: foundMedicine.generic_name,
-          dosage: foundMedicine.strength.join(', '),
-          form: "Tablet",
-          manufacturer: foundMedicine.manufacturer,
-          registration_no: foundMedicine.registration_number,
-          category: foundMedicine.category,
-          indications: foundMedicine.category,
-          side_effects: foundMedicine.side_effects.join(', '),
-          safety_score: safetyScore,
-          who_approved: foundMedicine.who_approved,
-          alternatives: foundMedicine.alternatives,
-        },
-      };
+    const foundMedicine = medicines && medicines.length > 0 ? medicines[0] : null;
 
-      // Store verification in history if userId provided
+    if (foundMedicine) {
+      // Medicine found in DRAP - store verification history
       if (userId) {
-        await supabase
-          .from('verification_history')
-          .insert({
-            user_id: userId,
-            medicine_name: medicineName,
-            extracted_text: medicineName,
-            verification_status: 'verified',
-            verified_data: verificationResult,
-          });
+        await supabase.from('verification_history').insert({
+          user_id: userId,
+          medicine_name: medicineName,
+          extracted_text: extractedText || medicineName,
+          verification_status: 'verified',
+          verified_data: {
+            id: foundMedicine.id,
+            name: foundMedicine.name,
+            generic_name: foundMedicine.generic_name,
+            strength: foundMedicine.strength,
+            manufacturer: foundMedicine.manufacturer,
+            registration_number: foundMedicine.registration_number,
+            category: foundMedicine.category,
+            who_approved: foundMedicine.who_approved,
+            side_effects: foundMedicine.side_effects,
+            alternatives: foundMedicine.alternatives,
+          }
+        });
       }
 
       return new Response(
-        JSON.stringify(verificationResult),
+        JSON.stringify({
+          found: true,
+          verified: true,
+          medicine: {
+            name: foundMedicine.name,
+            generic_name: foundMedicine.generic_name,
+            strength: foundMedicine.strength.join(', '),
+            dosage: foundMedicine.strength[0],
+            form: 'Tablet',
+            manufacturer: foundMedicine.manufacturer,
+            registration_no: foundMedicine.registration_number,
+            category: foundMedicine.category,
+            indications: foundMedicine.category,
+            side_effects: foundMedicine.side_effects.join(', '),
+            safety_score: foundMedicine.who_approved ? 95 : 75,
+          },
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -93,7 +94,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    // Get some sample medicines for AI context
+    // Get some alternatives from database for AI context
     const { data: allMedicines } = await supabase
       .from('medicines')
       .select('name, generic_name, category')
@@ -112,11 +113,11 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a pharmaceutical expert. Given a medicine name that is not in the DRAP (Drug Regulatory Authority of Pakistan) database, suggest 2-3 registered alternatives from this list: ${medicineList}. Provide brief reasoning for each suggestion based on similar therapeutic effects.`
+            content: `You are a pharmaceutical expert. Given a medicine name that is not in the DRAP (Drug Regulatory Authority of Pakistan) database, suggest 2-3 registered alternatives from this list: ${medicineList}. Provide reasoning for each suggestion based on similar therapeutic effects. Keep your response concise and professional.`
           },
           {
             role: 'user',
-            content: `Medicine not found in DRAP: "${medicineName}". Suggest alternatives and explain why in 2-3 sentences.`
+            content: `Medicine not found in DRAP: "${medicineName}". Suggest alternatives and explain why.`
           }
         ],
       }),
@@ -130,42 +131,42 @@ serve(async (req) => {
     const aiData = await aiResponse.json();
     const aiSuggestion = aiData.choices[0].message.content;
 
-    // Get top 3 alternatives from DRAP database
+    // Get top 3 alternatives from database
     const { data: alternatives } = await supabase
       .from('medicines')
       .select('*')
       .limit(3);
 
-    const altList = alternatives?.map(med => ({
-      name: med.name,
-      generic_name: med.generic_name,
-      manufacturer: med.manufacturer,
-      safety_score: Math.max(70, 100 - (med.side_effects?.length || 0) * 5),
+    const formattedAlternatives = alternatives?.map(alt => ({
+      name: alt.name,
+      generic_name: alt.generic_name,
+      manufacturer: alt.manufacturer,
+      safety_score: alt.who_approved ? 95 : 75,
+      dosage: alt.strength[0],
     })) || [];
 
-    verificationResult = {
-      found: false,
-      verified: false,
-      message: "Medicine not found in DRAP database",
-      ai_analysis: aiSuggestion,
-      alternatives: altList,
-    };
-
-    // Store verification in history if userId provided
+    // Store verification history for not found
     if (userId) {
-      await supabase
-        .from('verification_history')
-        .insert({
-          user_id: userId,
-          medicine_name: medicineName,
-          extracted_text: medicineName,
-          verification_status: 'not_found',
-          verified_data: verificationResult,
-        });
+      await supabase.from('verification_history').insert({
+        user_id: userId,
+        medicine_name: medicineName,
+        extracted_text: extractedText || medicineName,
+        verification_status: 'not_found',
+        verified_data: {
+          ai_analysis: aiSuggestion,
+          alternatives: formattedAlternatives,
+        }
+      });
     }
 
     return new Response(
-      JSON.stringify(verificationResult),
+      JSON.stringify({
+        found: false,
+        verified: false,
+        message: "Medicine not found in DRAP database",
+        ai_analysis: aiSuggestion,
+        alternatives: formattedAlternatives,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
