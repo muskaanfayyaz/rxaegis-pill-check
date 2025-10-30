@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -15,28 +17,100 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Simple client-side validation
+  const authSchema = z.object({
+    email: z.string().email("Please enter a valid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+  });
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        navigate("/dashboard", { replace: true });
+      }
+    });
+
+    // Also check existing session on mount
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        navigate("/dashboard", { replace: true });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // TODO: Implement Supabase sign in
-    toast({
-      title: "Sign in functionality",
-      description: "Connect to Lovable Cloud to enable authentication",
-    });
-    setLoading(false);
+    try {
+      const parsed = authSchema.safeParse({ email, password });
+      if (!parsed.success) {
+        const msg = parsed.error.issues[0]?.message ?? "Invalid credentials";
+        toast({ title: "Invalid input", description: msg, variant: "destructive" });
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      toast({ title: "Welcome back", description: "Signed in successfully" });
+      navigate("/dashboard", { replace: true });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // TODO: Implement Supabase sign up
-    toast({
-      title: "Sign up functionality",
-      description: "Connect to Lovable Cloud to enable authentication",
-    });
-    setLoading(false);
+    try {
+      const parsed = authSchema.safeParse({ email, password });
+      if (!parsed.success) {
+        const msg = parsed.error.issues[0]?.message ?? "Invalid credentials";
+        toast({ title: "Invalid input", description: msg, variant: "destructive" });
+        return;
+      }
+
+      const redirectUrl = `${window.location.origin}/dashboard`;
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        // Common case: user already registered
+        toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
+        return;
+      }
+
+      if (data.session) {
+        // Email confirmations disabled -> direct sign-in
+        toast({ title: "Account created", description: "You're signed in." });
+        navigate("/dashboard", { replace: true });
+      } else {
+        // Email confirmations enabled
+        toast({
+          title: "Verify your email",
+          description: "Check your inbox to confirm your account. You'll be redirected after confirmation.",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
