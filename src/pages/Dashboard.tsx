@@ -46,8 +46,19 @@ const Dashboard = () => {
 
     if (!uploadedFile.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload an image file",
+        title: "Invalid File",
+        description: "Please upload an image file (JPEG, PNG, or WebP)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Client-side size check
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (uploadedFile.size > maxSize) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
         variant: "destructive",
       });
       return;
@@ -68,16 +79,30 @@ const Dashboard = () => {
         reader.onerror = reject;
       });
 
+      // Get authentication session
+      const { data: { session } } = await supabase.auth.getSession();
+      
       // Call OCR edge function
       const { data: ocrData, error: ocrError } = await supabase.functions.invoke('ocr-extract', {
-        body: { imageBase64 }
+        body: { imageBase64 },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
       });
 
       if (ocrError) {
-        console.error('OCR error:', ocrError);
+        console.error('OCR Error:', ocrError);
+        let errorMessage = "Failed to extract text from image. Please try again.";
+        
+        if (ocrError.message?.includes('Authentication required')) {
+          errorMessage = "Please log in to use this feature.";
+        } else if (ocrError.message?.includes('too large')) {
+          errorMessage = "Image is too large. Please use an image smaller than 10MB.";
+        }
+        
         toast({
-          title: "OCR Failed",
-          description: "Could not extract text from image",
+          title: "Scan Failed",
+          description: errorMessage,
           variant: "destructive",
         });
         setIsScanning(false);
@@ -167,21 +192,33 @@ const Dashboard = () => {
 
       const results = [];
 
+      // Get authentication session
+      const { data: { session } } = await supabase.auth.getSession();
+
       for (const medicine of medicines) {
         const { data, error } = await supabase.functions.invoke('verify-medicine', {
           body: { 
             medicineName: medicine,
-            userId: userId
+            extractedText: ocrText
+          },
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`
           }
         });
 
         if (error) {
-          console.error('Error verifying medicine:', error);
+          console.error('Verification Error:', error);
+          let errorMessage = 'Verification failed';
+          
+          if (error.message?.includes('Authentication required')) {
+            errorMessage = 'Please log in to verify medicines';
+          }
+          
           results.push({
             name: medicine,
             status: "error",
             registered: false,
-            error: "Failed to verify",
+            error: errorMessage,
           });
         } else {
           results.push({

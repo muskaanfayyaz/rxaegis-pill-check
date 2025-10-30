@@ -11,25 +11,53 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { imageBase64 } = await req.json();
     
-    if (!imageBase64) {
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'Image data is required' }),
+        JSON.stringify({ error: 'Valid image data is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate image format
+    if (!imageBase64.match(/^data:image\/(jpeg|jpg|png|webp);base64,/)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid image format. Please upload JPEG, PNG, or WebP.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate image size (base64 length / 1.37 ≈ original size)
+    const estimatedSizeInBytes = (imageBase64.length * 3) / 4;
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    
+    if (estimatedSizeInBytes > maxSizeInBytes) {
+      return new Response(
+        JSON.stringify({ error: 'Image too large. Maximum size is 10MB.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not configured');
+      console.error('AI service configuration missing');
       return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
+        JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Performing OCR on image...');
+    console.log('Processing image with OCR...');
 
     // Call Gemini AI for OCR
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -61,10 +89,9 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Gemini API error:', response.status, errorText);
+      console.error('OCR service error:', response.status, await response.text());
       return new Response(
-        JSON.stringify({ error: 'OCR processing failed' }),
+        JSON.stringify({ error: 'Unable to process image. Please try again.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -80,9 +107,9 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('OCR error:', error);
+    console.error('Image processing error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to process image' }),
+      JSON.stringify({ error: 'Unable to process image. Please try again.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -13,11 +13,44 @@ serve(async (req) => {
   }
 
   try {
-    const { medicineName, userId, extractedText } = await req.json();
-    
-    if (!medicineName) {
+    // Extract userId from authenticated JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: "Medicine name is required" }),
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = user.id;
+    const { medicineName, extractedText } = await req.json();
+    
+    if (!medicineName || typeof medicineName !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Valid medicine name is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate medicine name length
+    if (medicineName.length > 200) {
+      return new Response(
+        JSON.stringify({ error: 'Medicine name too long' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -29,14 +62,15 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Clean medicine name: keep the medicine name and strength, remove only instructions
-    // Split by comma to separate medicine name from dosage instructions
-    const firstPart = medicineName.split(',')[0];
-    
+    // Clean and sanitize the medicine name - remove dosage instructions
+    const firstPart = medicineName.split(/\s+(?:for|three|twice|once|take|x\d+|daily|days|morning|evening|night|\d+x)/i)[0];
     const cleanName = firstPart
-      .replace(/\b(tablets?|capsules?|x\d+|daily|times|days|take|with|after|before|food|water|morning|evening|night|do|not|skip|any)\b/gi, '') // Remove common instruction words and tablet counts
-      .replace(/\s+/g, ' ') // Normalize spaces
-      .trim();
+      .replace(/\d+\s*(?:mg|g|ml|mcg|tab|tablet|tablets|cap|capsule|capsules|x)?\s*$/i, '')
+      .replace(/\s*\([^)]*\)\s*/g, ' ')
+      .replace(/[^a-zA-Z0-9\s\-()]/g, '') // Remove special characters to prevent injection
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .substring(0, 100); // Limit length
 
     console.log("Cleaned medicine name:", cleanName);
 
@@ -52,16 +86,32 @@ serve(async (req) => {
       );
     }
 
-    // Search for medicine in database by name or generic name
-    const { data: medicines, error: searchError } = await supabase
+    // Search for medicine in database using separate queries to avoid injection
+    const { data: nameMatches, error: nameError } = await supabase
       .from('medicines')
       .select('*')
-      .or(`name.ilike.%${cleanName}%,generic_name.ilike.%${cleanName}%`)
-      .limit(5);
+      .ilike('name', `%${cleanName}%`)
+      .limit(3);
+
+    const { data: genericMatches, error: genericError } = await supabase
+      .from('medicines')
+      .select('*')
+      .ilike('generic_name', `%${cleanName}%`)
+      .limit(3);
+
+    const searchError = nameError || genericError;
+    const medicines = [...(nameMatches || []), ...(genericMatches || [])]
+      .filter((item, index, self) => 
+        index === self.findIndex((t) => t.id === item.id)
+      )
+      .slice(0, 5);
 
     if (searchError) {
       console.error('Database search error:', searchError);
-      throw new Error('Failed to search medicines database');
+      return new Response(
+        JSON.stringify({ error: 'Unable to verify medicine at this time. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Find best match using fuzzy matching
@@ -129,7 +179,11 @@ serve(async (req) => {
     // Medicine not found - use AI to suggest alternatives
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error('AI service configuration missing');
+      return new Response(
+        JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Get some alternatives from database for AI context
@@ -162,8 +216,11 @@ serve(async (req) => {
     });
 
     if (!aiResponse.ok) {
-      console.error('AI API error:', aiResponse.status);
-      throw new Error('Failed to get AI suggestions');
+      console.error('AI service error:', aiResponse.status, await aiResponse.text());
+      return new Response(
+        JSON.stringify({ error: 'Unable to process request. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const aiData = await aiResponse.json();
@@ -209,9 +266,9 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in verify-medicine:', error);
+    console.error('Verification processing error:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Unable to verify medicine. Please try again.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
