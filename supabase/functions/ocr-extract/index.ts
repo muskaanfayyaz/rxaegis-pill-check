@@ -46,7 +46,7 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: 'Extract ONLY the medicine names from this prescription or medicine package image. List each medicine name on a separate line. Do NOT include dosages, quantities, tablet counts, or any other information. Only return medicine names, nothing else.'
+                text: 'Extract the medicine names WITH their strength/quantity from this prescription or medicine package image. List each medicine name on a separate line. Include the full medicine name with strength (e.g., "Folic Acid BP 5mg", "Panadol (Paracetamol) 500mg"). Do NOT include dosage instructions like "three times daily", "14 days", or tablet counts like "x20". Only return medicine names with their strength, one per line.'
               },
               {
                 type: 'image_url',
