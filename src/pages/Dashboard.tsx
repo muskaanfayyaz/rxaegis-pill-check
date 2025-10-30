@@ -9,6 +9,8 @@ const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
   const [ocrText, setOcrText] = useState("");
   const [isScanning, setIsScanning] = useState(false);
+  const [verificationResults, setVerificationResults] = useState<any[]>([]);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,11 +41,30 @@ const Dashboard = () => {
       return;
     }
 
-    // TODO: Call verification API
+    setIsVerifying(true);
     toast({
       title: "Verification started",
       description: "Checking medicines against DRAP database",
     });
+
+    // TODO: Replace with actual API call
+    setTimeout(() => {
+      const mockResults = [
+        {
+          name: "Paracetamol 500mg",
+          status: "verified",
+          registered: true,
+          manufacturer: "GSK Pakistan",
+          registration_no: "054321",
+        },
+      ];
+      setVerificationResults(mockResults);
+      setIsVerifying(false);
+      toast({
+        title: "Verification complete",
+        description: "Medicine authenticity check finished",
+      });
+    }, 2000);
   };
 
   return (
@@ -151,10 +172,37 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <Shield className="h-16 w-16 mx-auto mb-4 opacity-20" />
-                <p>Upload a prescription to see verification results</p>
-              </div>
+              {isVerifying ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground">Verifying medicines...</p>
+                </div>
+              ) : verificationResults.length > 0 ? (
+                <div className="space-y-4">
+                  {verificationResults.map((result, idx) => (
+                    <div key={idx} className="p-4 bg-muted rounded-lg space-y-2">
+                      <div className="flex items-start justify-between">
+                        <h3 className="font-semibold">{result.name}</h3>
+                        {result.registered ? (
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                        )}
+                      </div>
+                      <div className="text-sm space-y-1">
+                        <p><span className="font-medium">Status:</span> {result.status}</p>
+                        <p><span className="font-medium">Manufacturer:</span> {result.manufacturer}</p>
+                        <p><span className="font-medium">Registration:</span> {result.registration_no}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Shield className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p>Upload a prescription to see verification results</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
