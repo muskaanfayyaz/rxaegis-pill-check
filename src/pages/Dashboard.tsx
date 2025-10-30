@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import Tesseract from "tesseract.js";
 
 const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -12,24 +13,90 @@ const Dashboard = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [verificationResults, setVerificationResults] = useState<any[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [recentVerifications, setRecentVerifications] = useState<any[]>([]);
+  const [userId, setUserId] = useState<string>("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        fetchRecentVerifications(user.id);
+      }
+    };
+    getUser();
+  }, []);
+
+  const fetchRecentVerifications = async (uid: string) => {
+    const { data, error } = await supabase
+      .from('verification_history')
+      .select('*')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (!error && data) {
+      setRecentVerifications(data);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (!uploadedFile) return;
 
+    // Only accept images
+    if (!uploadedFile.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setFile(uploadedFile);
     setIsScanning(true);
+    setOcrText("");
+    setVerificationResults([]);
 
-    // TODO: Implement OCR with Tesseract.js
-    setTimeout(() => {
-      setOcrText("Sample extracted text: Paracetamol 500mg, Take 1 tablet every 6 hours");
+    try {
+      // Perform OCR using Tesseract.js
+      const result = await Tesseract.recognize(
+        uploadedFile,
+        'eng',
+        {
+          logger: (m) => console.log(m),
+        }
+      );
+
+      const extractedText = result.data.text.trim();
+      
+      if (!extractedText) {
+        toast({
+          title: "No text found",
+          description: "Could not extract text from the image",
+          variant: "destructive",
+        });
+        setIsScanning(false);
+        return;
+      }
+
+      setOcrText(extractedText);
       setIsScanning(false);
       toast({
         title: "OCR Complete",
         description: "Text extracted successfully",
       });
-    }, 2000);
+    } catch (error) {
+      console.error('OCR error:', error);
+      setIsScanning(false);
+      toast({
+        title: "OCR Failed",
+        description: "Could not extract text from image",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleVerify = async () => {
@@ -42,6 +109,15 @@ const Dashboard = () => {
       return;
     }
 
+    if (!userId) {
+      toast({
+        title: "Not authenticated",
+        description: "Please log in to verify medicines",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsVerifying(true);
     toast({
       title: "Verification started",
@@ -49,13 +125,34 @@ const Dashboard = () => {
     });
 
     try {
-      // Extract medicine names from OCR text (simple extraction for demo)
-      const medicines = ocrText.split(',').map(m => m.trim());
+      // Extract medicine names from OCR text
+      // Split by common delimiters and filter out empty strings
+      const lines = ocrText.split(/[,\n\r]+/).map(m => m.trim()).filter(m => m.length > 0);
+      
+      // Extract potential medicine names (look for words with dosage patterns)
+      const medicines = lines.filter(line => {
+        // Filter lines that look like medicine names (contain letters and possibly numbers/mg)
+        return line.length > 2 && /[a-zA-Z]{3,}/.test(line);
+      }).slice(0, 5); // Limit to 5 medicines
+
+      if (medicines.length === 0) {
+        toast({
+          title: "No medicines found",
+          description: "Could not extract medicine names from text",
+          variant: "destructive",
+        });
+        setIsVerifying(false);
+        return;
+      }
+
       const results = [];
 
       for (const medicine of medicines) {
         const { data, error } = await supabase.functions.invoke('verify-medicine', {
-          body: { medicineName: medicine }
+          body: { 
+            medicineName: medicine,
+            userId: userId
+          }
         });
 
         if (error) {
@@ -78,6 +175,10 @@ const Dashboard = () => {
 
       setVerificationResults(results);
       setIsVerifying(false);
+      
+      // Refresh recent verifications
+      fetchRecentVerifications(userId);
+      
       toast({
         title: "Verification complete",
         description: `Checked ${results.length} medicine(s)`,
@@ -319,9 +420,47 @@ const Dashboard = () => {
             <CardDescription>Your prescription check history</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No previous checks found</p>
-            </div>
+            {recentVerifications.length > 0 ? (
+              <div className="space-y-3">
+                {recentVerifications.map((verification) => (
+                  <div key={verification.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{verification.medicine_name}</p>
+                        {verification.verification_status === 'verified' ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(verification.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                    <div className="text-sm">
+                      <span className={`px-2 py-1 rounded-full ${
+                        verification.verification_status === 'verified' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200'
+                      }`}>
+                        {verification.verification_status === 'verified' ? 'Verified' : 'Not Found'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Shield className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                <p>No previous checks found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

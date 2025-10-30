@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      medicines: {
+        Row: {
+          alternatives: string[]
+          authenticity_status: string
+          barcode: string
+          category: string
+          created_at: string | null
+          generic_name: string
+          id: string
+          manufacturer: string
+          name: string
+          registration_number: string
+          side_effects: string[]
+          strength: string[]
+          who_approved: boolean
+        }
+        Insert: {
+          alternatives: string[]
+          authenticity_status: string
+          barcode: string
+          category: string
+          created_at?: string | null
+          generic_name: string
+          id: string
+          manufacturer: string
+          name: string
+          registration_number: string
+          side_effects: string[]
+          strength: string[]
+          who_approved: boolean
+        }
+        Update: {
+          alternatives?: string[]
+          authenticity_status?: string
+          barcode?: string
+          category?: string
+          created_at?: string | null
+          generic_name?: string
+          id?: string
+          manufacturer?: string
+          name?: string
+          registration_number?: string
+          side_effects?: string[]
+          strength?: string[]
+          who_approved?: boolean
+        }
+        Relationships: []
+      }
+      verification_history: {
+        Row: {
+          created_at: string | null
+          extracted_text: string
+          id: string
+          medicine_name: string
+          user_id: string
+          verification_status: string
+          verified_data: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          extracted_text: string
+          id?: string
+          medicine_name: string
+          user_id: string
+          verification_status: string
+          verified_data?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          extracted_text?: string
+          id?: string
+          medicine_name?: string
+          user_id?: string
+          verification_status?: string
+          verified_data?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
