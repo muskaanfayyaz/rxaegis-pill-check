@@ -114,15 +114,15 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
+    <div className="flex items-center justify-center bg-gradient-hero p-4 py-12 sm:py-16">
       <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-4 text-center">
+        <CardHeader className="space-y-3 sm:space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={logo} alt="RxAegis" className="h-16 object-contain" />
+            <img src={logo} alt="RxAegis" className="h-12 sm:h-16 object-contain" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Welcome to RxAegis</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl sm:text-2xl">Welcome to RxAegis</CardTitle>
+            <CardDescription className="text-sm">
               Your trusted medicine verification platform
             </CardDescription>
           </div>

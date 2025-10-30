@@ -6,27 +6,30 @@ import logo from "@/assets/logo.png";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-hero border-b">
-        <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
-            <img src={logo} alt="RxAegis" className="h-20 md:h-24 mx-auto mb-8 object-contain" />
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            <img src={logo} alt="RxAegis" className="h-16 sm:h-20 md:h-24 mx-auto mb-6 sm:mb-8 object-contain" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-primary bg-clip-text text-transparent px-4">
               Verify Your Medicines with Confidence
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
               RxAegis helps you verify medicine authenticity against Pakistan's DRAP database. 
               Upload prescriptions, scan packages, and ensure your health safety.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth">
-                <Button size="lg" className="w-full sm:w-auto shadow-md">
+            <p className="text-sm sm:text-base font-semibold text-primary mb-6 sm:mb-8 px-4">
+              🇵🇰 An idea made in Pakistan for Pakistan
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+              <Link to="/auth" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full shadow-md">
                   Get Started
                 </Button>
               </Link>
-              <Link to="/dashboard">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
+              <Link to="/dashboard" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full">
                   View Demo
                 </Button>
               </Link>
@@ -36,18 +39,18 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
               Protect Your Health with Smart Verification
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
               Our comprehensive platform ensures every medicine you take is safe, verified, and authentic
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <Shield className="h-12 w-12 text-primary mb-4" />
@@ -112,18 +115,18 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 md:py-24 bg-gradient-hero">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-hero">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
               How RxAegis Works
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
               Three simple steps to verify your medicines
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+          <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 1
@@ -158,24 +161,24 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="container mx-auto px-4">
           <Card className="max-w-3xl mx-auto shadow-lg bg-gradient-primary text-primary-foreground">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <CardContent className="p-6 sm:p-8 md:p-10 lg:p-12 text-center">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 Start Verifying Your Medicines Today
               </h2>
-              <p className="text-lg mb-8 opacity-90">
+              <p className="text-base sm:text-lg mb-6 sm:mb-8 opacity-90">
                 Join thousands of users protecting their health with RxAegis
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/auth">
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto shadow-md">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <Link to="/auth" className="w-full sm:w-auto">
+                  <Button size="lg" variant="secondary" className="w-full shadow-md">
                     Sign Up Free
                   </Button>
                 </Link>
-                <Link to="/dashboard">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border-white/20">
+                <Link to="/dashboard" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full bg-white/10 hover:bg-white/20 border-white/20">
                     Try Demo
                   </Button>
                 </Link>
@@ -184,13 +187,6 @@ const Index = () => {
           </Card>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 RxAegis. Protecting health through medicine verification.</p>
-        </div>
-      </footer>
     </div>
   );
 };

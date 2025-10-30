@@ -215,16 +215,16 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <div className="container mx-auto p-4 md:p-8 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Medicine Verification Dashboard</h1>
-          <p className="text-muted-foreground">
+    <div className="bg-gradient-hero">
+      <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Medicine Verification Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Upload prescriptions or scan medicine packages to verify authenticity
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
           {/* Upload Section */}
           <Card className="shadow-md">
             <CardHeader>
