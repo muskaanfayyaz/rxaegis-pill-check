@@ -46,7 +46,7 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: 'Extract all medicine names, dosages, and any other relevant text from this prescription or medicine image. List each medicine on a new line with its dosage. Only return the extracted text, nothing else.'
+                text: 'Extract ONLY the medicine names from this prescription or medicine package image. List each medicine name on a separate line. Do NOT include dosages, quantities, tablet counts, or any other information. Only return medicine names, nothing else.'
               },
               {
                 type: 'image_url',

@@ -140,13 +140,19 @@ const Dashboard = () => {
 
     try {
       // Extract medicine names from OCR text
-      // Split by common delimiters and filter out empty strings
-      const lines = ocrText.split(/[,\n\r]+/).map(m => m.trim()).filter(m => m.length > 0);
+      const lines = ocrText.split(/[\n\r]+/).map(m => m.trim()).filter(m => m.length > 0);
       
-      // Extract potential medicine names (look for words with dosage patterns)
+      // Filter to get only valid medicine names
       const medicines = lines.filter(line => {
-        // Filter lines that look like medicine names (contain letters and possibly numbers/mg)
-        return line.length > 2 && /[a-zA-Z]{3,}/.test(line);
+        // Remove lines that are clearly not medicine names
+        if (line.length < 3) return false;
+        if (/^\d+$/.test(line)) return false; // Only numbers
+        if (/^[\d\s\-x]+$/.test(line)) return false; // Only numbers, spaces, dashes, x
+        if (/(tablets?|capsules?|syrup|strip|pack|box)$/i.test(line)) return false; // Ends with common non-medicine words
+        if (/^(for|the|and|with|use|take|as|directed|by|doctor|physician)$/i.test(line)) return false; // Common instruction words
+        
+        // Must contain at least 3 letters
+        return /[a-zA-Z]{3,}/.test(line);
       }).slice(0, 5); // Limit to 5 medicines
 
       if (medicines.length === 0) {
