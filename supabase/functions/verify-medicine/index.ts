@@ -62,20 +62,21 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Clean and sanitize the medicine name - remove dosage instructions
-    const firstPart = medicineName.split(/\s+(?:for|three|twice|once|take|x\d+|daily|days|morning|evening|night|\d+x)/i)[0];
-    const cleanName = firstPart
-      .replace(/\d+\s*(?:mg|g|ml|mcg|tab|tablet|tablets|cap|capsule|capsules|x)?\s*$/i, '')
-      .replace(/\s*\([^)]*\)\s*/g, ' ')
-      .replace(/[^a-zA-Z0-9\s\-()]/g, '') // Remove special characters to prevent injection
+    // Clean and sanitize the medicine name
+    // Keep dosage info but extract the main medicine name
+    const cleanName = medicineName
+      .replace(/\s*\([^)]*\)\s*/g, ' ') // Remove parentheses content
+      .replace(/\d+\s*(?:mg|g|ml|mcg|tab|tablet|tablets|cap|capsule|capsules|x)\s*$/i, '') // Remove trailing dosage
+      .replace(/\s+(?:for|three|twice|once|take|x\d+|daily|days|morning|evening|night|\d+x).*$/i, '') // Remove dosage instructions at end
+      .replace(/[^a-zA-Z0-9\s\-+]/g, '') // Keep alphanumeric, spaces, hyphens, and plus signs
       .replace(/\s{2,}/g, ' ')
       .trim()
-      .substring(0, 100); // Limit length
+      .substring(0, 100);
 
     console.log("Cleaned medicine name:", cleanName);
 
-    if (!cleanName || cleanName.length < 3) {
-      console.log("Medicine name too short after cleaning, skipping");
+    if (!cleanName || cleanName.length < 2) {
+      console.log("Medicine name too short after cleaning");
       return new Response(
         JSON.stringify({
           found: false,
@@ -86,49 +87,92 @@ serve(async (req) => {
       );
     }
 
-    // Search for medicine in database using separate queries to avoid injection
-    const { data: nameMatches, error: nameError } = await supabase
-      .from('medicines')
-      .select('*')
-      .ilike('name', `%${cleanName}%`)
-      .limit(3);
+    // Create search patterns - try multiple approaches for better matching
+    const searchTerms = [
+      cleanName, // Full cleaned name
+      cleanName.split(/\s+/)[0], // First word only (brand name)
+      ...cleanName.split(/\s+/).filter(word => word.length > 3) // Individual significant words
+    ].filter((term, index, self) => self.indexOf(term) === index); // Remove duplicates
 
-    const { data: genericMatches, error: genericError } = await supabase
-      .from('medicines')
-      .select('*')
-      .ilike('generic_name', `%${cleanName}%`)
-      .limit(3);
+    console.log("Search terms:", searchTerms);
 
-    const searchError = nameError || genericError;
-    const medicines = [...(nameMatches || []), ...(genericMatches || [])]
-      .filter((item, index, self) => 
-        index === self.findIndex((t) => t.id === item.id)
-      )
-      .slice(0, 5);
+    // Search for medicine using multiple strategies
+    const searchPromises = searchTerms.slice(0, 3).map(term => 
+      Promise.all([
+        supabase.from('medicines').select('*').ilike('name', `%${term}%`).limit(10),
+        supabase.from('medicines').select('*').ilike('generic_name', `%${term}%`).limit(10)
+      ])
+    );
 
-    if (searchError) {
-      console.error('Database search error:', searchError);
+    const searchResults = await Promise.all(searchPromises);
+    
+    // Flatten and deduplicate results
+    const allMedicines = new Map();
+    searchResults.forEach(([nameResult, genericResult]) => {
+      [...(nameResult.data || []), ...(genericResult.data || [])].forEach(med => {
+        allMedicines.set(med.id, med);
+      });
+    });
+
+    const medicines = Array.from(allMedicines.values());
+
+    if (searchResults.some(([n, g]) => n.error || g.error)) {
+      console.error('Database search error');
       return new Response(
-        JSON.stringify({ error: 'Unable to verify medicine at this time. Please try again.' }),
+        JSON.stringify({ error: 'Unable to verify medicine. Please try again.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Find best match using fuzzy matching
+    // Find best match using multiple matching strategies
     let foundMedicine = null;
     if (medicines && medicines.length > 0) {
-      // Try exact match first
+      // Strategy 1: Exact match (case-insensitive)
       foundMedicine = medicines.find(m => 
         m.name.toLowerCase() === cleanName.toLowerCase() ||
         m.generic_name.toLowerCase() === cleanName.toLowerCase()
       );
       
-      // If no exact match, use first partial match
+      // Strategy 2: Exact match on first word (common for brand names)
       if (!foundMedicine) {
-        foundMedicine = medicines[0];
+        const firstWord = cleanName.split(/\s+/)[0].toLowerCase();
+        foundMedicine = medicines.find(m => 
+          m.name.toLowerCase() === firstWord ||
+          m.name.toLowerCase().startsWith(firstWord + ' ')
+        );
       }
       
-      console.log("Found medicine:", foundMedicine?.name);
+      // Strategy 3: Contains match with highest relevance
+      if (!foundMedicine && medicines.length > 0) {
+        // Score each medicine by match quality
+        const scored = medicines.map(m => {
+          const nameLower = m.name.toLowerCase();
+          const genericLower = m.generic_name.toLowerCase();
+          const cleanLower = cleanName.toLowerCase();
+          
+          let score = 0;
+          if (nameLower.includes(cleanLower)) score += 10;
+          if (genericLower.includes(cleanLower)) score += 8;
+          if (cleanLower.includes(nameLower)) score += 7;
+          if (cleanLower.includes(genericLower)) score += 6;
+          
+          // Bonus for shorter matches (more specific)
+          if (nameLower.length < cleanLower.length * 1.5) score += 2;
+          
+          return { medicine: m, score };
+        });
+        
+        scored.sort((a, b) => b.score - a.score);
+        if (scored[0].score > 0) {
+          foundMedicine = scored[0].medicine;
+        }
+      }
+      
+      if (foundMedicine) {
+        console.log("Found medicine:", foundMedicine.name, "- Generic:", foundMedicine.generic_name);
+      } else {
+        console.log("No suitable match found among", medicines.length, "candidates");
+      }
     }
 
     if (foundMedicine) {
@@ -186,13 +230,54 @@ serve(async (req) => {
       );
     }
 
-    // Get some alternatives from database for AI context
-    const { data: allMedicines } = await supabase
+    // Determine the category/therapeutic use for better alternative suggestions
+    // Try to infer from the medicine name
+    let inferredCategory = 'general medicine';
+    const categoryKeywords = {
+      'Analgesic': ['paracetamol', 'aspirin', 'pain', 'ache', 'brufen', 'ibuprofen', 'panadol', 'disprin', 'ponstan'],
+      'Antibiotic': ['antibiotic', 'amoxicillin', 'azithromycin', 'ciprofloxacin', 'augmentin', 'flagyl', 'levofloxacin'],
+      'Antidiabetic': ['diabetic', 'metformin', 'glucophage', 'glimepiride', 'insulin'],
+      'Antihypertensive': ['blood pressure', 'hypertension', 'amlodipine', 'losartan', 'enalapril'],
+      'Antihistamine': ['allergy', 'cetirizine', 'loratadine', 'zyrtec', 'antihistamine'],
+      'PPI': ['acid', 'omeprazole', 'esomeprazole', 'risek', 'nexum', 'heartburn', 'ulcer'],
+      'Cold & Flu': ['cold', 'flu', 'cough', 'fever'],
+      'Antiemetic': ['nausea', 'vomiting', 'motion sickness'],
+      'Bronchodilator': ['asthma', 'breathing', 'inhaler', 'ventolin'],
+    };
+
+    for (const [category, keywords] of Object.entries(categoryKeywords)) {
+      if (keywords.some(kw => medicineName.toLowerCase().includes(kw))) {
+        inferredCategory = category;
+        break;
+      }
+    }
+
+    console.log("Inferred category:", inferredCategory);
+
+    // Get alternatives from the same category
+    const { data: categoryMedicines } = await supabase
+      .from('medicines')
+      .select('name, generic_name, category')
+      .ilike('category', `%${inferredCategory}%`)
+      .limit(30);
+
+    // Also get some general medicines as fallback
+    const { data: generalMedicines } = await supabase
       .from('medicines')
       .select('name, generic_name, category')
       .limit(20);
 
-    const medicineList = allMedicines?.map(m => `${m.name} (${m.generic_name}) - ${m.category}`).join(', ') || '';
+    // Deduplicate using name+generic_name combination
+    const seenMedicines = new Set();
+    const availableMedicines = [...(categoryMedicines || []), ...(generalMedicines || [])]
+      .filter((item) => {
+        const key = `${item.name}-${item.generic_name}`;
+        if (seenMedicines.has(key)) return false;
+        seenMedicines.add(key);
+        return true;
+      });
+
+    const medicineList = availableMedicines.map(m => `${m.name} (${m.generic_name}) - treats ${m.category}`).join('\n') || '';
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -205,11 +290,27 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a pharmaceutical expert. Given a medicine name that is not in the DRAP (Drug Regulatory Authority of Pakistan) database, suggest 2-3 registered alternatives from this list: ${medicineList}. Provide reasoning for each suggestion based on similar therapeutic effects. Keep your response concise and professional.`
+            content: `You are a pharmaceutical expert for Pakistan's DRAP database. When a medicine is not found, suggest 2-3 DRAP-registered alternatives that treat THE SAME ILLNESS or condition. 
+
+CRITICAL: Only suggest alternatives that have the SAME therapeutic use and treat the SAME medical condition. For example:
+- If the medicine is for pain relief, only suggest pain relievers
+- If it's an antibiotic, only suggest antibiotics for similar infections
+- If it's for diabetes, only suggest diabetes medications
+- If it's for blood pressure, only suggest blood pressure medications
+
+Available DRAP-registered medicines:
+${medicineList}
+
+Format your response as:
+1. [Medicine Name] ([Generic Name]) - [Brief reason why it treats the same condition]
+2. [Medicine Name] ([Generic Name]) - [Brief reason why it treats the same condition]
+3. [Medicine Name] ([Generic Name]) - [Brief reason why it treats the same condition]
+
+Keep explanations brief and focused on therapeutic equivalence.`
           },
           {
             role: 'user',
-            content: `Medicine not found in DRAP: "${medicineName}". Suggest alternatives and explain why.`
+            content: `Medicine not found in DRAP: "${medicineName}". The medicine appears to be used for: ${inferredCategory}. Suggest alternatives that treat the same condition.`
           }
         ],
       }),
@@ -226,10 +327,11 @@ serve(async (req) => {
     const aiData = await aiResponse.json();
     const aiSuggestion = aiData.choices[0].message.content;
 
-    // Get top 3 alternatives from database
+    // Get top alternatives from the same category
     const { data: alternatives } = await supabase
       .from('medicines')
       .select('*')
+      .ilike('category', `%${inferredCategory}%`)
       .limit(3);
 
     const formattedAlternatives = alternatives?.map(alt => ({
