@@ -29,14 +29,19 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Clean medicine name: remove dosage, forms, and extra text
-    const cleanName = medicineName
-      .replace(/\d+\s*(mg|g|ml|mcg|iu|tablets?|capsules?|x)/gi, '')
+    // Clean medicine name: extract only the medicine name, remove instructions
+    // Split by comma to separate medicine name from dosage instructions
+    const firstPart = medicineName.split(',')[0];
+    
+    const cleanName = firstPart
+      .replace(/\d+\s*(mg|g|ml|mcg|iu|tablets?|capsules?|x)/gi, '') // Remove dosages
       .replace(/\(.*?\)/g, '') // Remove text in parentheses
-      .replace(/\b(tablets?|capsules?|syrup|injection|ip|bp|usp)\b/gi, '')
+      .replace(/\b(tablets?|capsules?|syrup|injection|ip|bp|usp|daily|times|days|take|with|after|before|food|water|morning|evening|night|do|not|skip|any)\b/gi, '') // Remove common instruction words
+      .replace(/[^\w\s]/g, '') // Remove special characters
       .trim()
       .split(/\s+/)
       .filter((word: string) => word.length > 2) // Filter out short words
+      .slice(0, 3) // Take only first 3 words (medicine names are typically 1-3 words)
       .join(' ');
 
     console.log("Cleaned medicine name:", cleanName);
