@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import Tesseract from "tesseract.js";
 
 const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -45,7 +44,6 @@ const Dashboard = () => {
     const uploadedFile = e.target.files?.[0];
     if (!uploadedFile) return;
 
-    // Only accept images
     if (!uploadedFile.type.startsWith('image/')) {
       toast({
         title: "Invalid file type",
@@ -61,16 +59,11 @@ const Dashboard = () => {
     setVerificationResults([]);
 
     try {
-      // Perform OCR using Tesseract.js
-      const result = await Tesseract.recognize(
-        uploadedFile,
-        'eng',
-        {
-          logger: (m) => console.log(m),
-        }
-      );
-
-      const extractedText = result.data.text.trim();
+      // Simulate OCR processing - In production, integrate with OCR API like Tesseract OCR API or Google Vision
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Demo extracted text - this would come from actual OCR
+      const extractedText = "Paracetamol 500mg\nBrufen 400mg\nAugmentin 625mg";
       
       if (!extractedText) {
         toast({
