@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill } from "lucide-react";
+import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill, ScanLine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import Scanner from "@/components/Scanner";
 
 const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -275,9 +276,10 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <Tabs defaultValue="upload" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="upload">Upload File</TabsTrigger>
-                  <TabsTrigger value="camera">Use Camera</TabsTrigger>
+                  <TabsTrigger value="qr">QR Scanner</TabsTrigger>
+                  <TabsTrigger value="camera">Camera</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="upload" className="space-y-4">
@@ -307,6 +309,15 @@ const Dashboard = () => {
                       </p>
                     </div>
                   )}
+                </TabsContent>
+
+                <TabsContent value="qr" className="space-y-4">
+                  <Scanner onScanComplete={(result) => {
+                    toast({
+                      title: "Scan Complete",
+                      description: `Scanned: ${result.text.substring(0, 50)}...`,
+                    });
+                  }} />
                 </TabsContent>
 
                 <TabsContent value="camera" className="space-y-4">

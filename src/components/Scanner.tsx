@@ -104,7 +104,7 @@ const Scanner = ({ onScanComplete }: ScannerProps) => {
       }
 
       const { error } = await supabase
-        .from("scan_history")
+        .from("scan_history" as any)
         .insert({
           user_id: user.id,
           scan_data: result.text,

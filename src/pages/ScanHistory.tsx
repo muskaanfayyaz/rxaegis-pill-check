@@ -41,14 +41,14 @@ const ScanHistory = () => {
   const fetchScanHistory = async () => {
     try {
       const { data, error } = await supabase
-        .from("scan_history")
+        .from("scan_history" as any)
         .select("*")
         .order("scanned_at", { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
-      setScans(data || []);
+      setScans(data as any || []);
     } catch (error) {
       console.error("Error fetching scan history:", error);
       toast({

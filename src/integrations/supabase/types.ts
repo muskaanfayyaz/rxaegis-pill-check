@@ -62,6 +62,33 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_history: {
+        Row: {
+          created_at: string
+          id: string
+          scan_data: string
+          scan_format: string | null
+          scanned_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          scan_data: string
+          scan_format?: string | null
+          scanned_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          scan_data?: string
+          scan_format?: string | null
+          scanned_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       verification_history: {
         Row: {
           created_at: string | null
