@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +6,7 @@ import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill, ScanLine } fr
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Scanner from "@/components/Scanner";
+import CameraCapture from "@/components/CameraCapture";
 
 const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -38,6 +39,75 @@ const Dashboard = () => {
 
     if (!error && data) {
       setRecentVerifications(data);
+    }
+  };
+
+  const handleCameraCapture = async (imageFile: File) => {
+    if (!imageFile) return;
+
+    setFile(imageFile);
+    setIsScanning(true);
+    setOcrText("");
+    setVerificationResults([]);
+
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(imageFile);
+      
+      const imageBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { data: ocrData, error: ocrError } = await supabase.functions.invoke('ocr-extract', {
+        body: { imageBase64 },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
+
+      if (ocrError) {
+        console.error('OCR Error:', ocrError);
+        toast({
+          title: "Scan Failed",
+          description: "Failed to extract text from image. Please try again.",
+          variant: "destructive",
+        });
+        setIsScanning(false);
+        return;
+      }
+
+      const extractedText = ocrData?.extractedText || '';
+      
+      if (!extractedText) {
+        toast({
+          title: "No text found",
+          description: "Could not extract text from the image",
+          variant: "destructive",
+        });
+        setIsScanning(false);
+        return;
+      }
+
+      setOcrText(extractedText);
+      setIsScanning(false);
+      toast({
+        title: "OCR Complete",
+        description: "Text extracted successfully. Click 'Verify Medicines' to check.",
+      });
+      
+      // Auto-verify after OCR
+      await handleVerify();
+    } catch (error) {
+      console.error('OCR error:', error);
+      setIsScanning(false);
+      toast({
+        title: "OCR Failed",
+        description: "Could not extract text from image",
+        variant: "destructive",
+      });
     }
   };
 
@@ -321,15 +391,7 @@ const Dashboard = () => {
                 </TabsContent>
 
                 <TabsContent value="camera" className="space-y-4">
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                    <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Camera feature coming soon
-                    </p>
-                    <Button variant="outline" size="sm">
-                      Open Camera
-                    </Button>
-                  </div>
+                  <CameraCapture onCapture={handleCameraCapture} />
                 </TabsContent>
               </Tabs>
 
@@ -394,16 +456,16 @@ const Dashboard = () => {
                                 <p className="text-muted-foreground">{result.medicine.generic_name}</p>
                               </div>
                               <div>
-                                <span className="font-medium">Dosage:</span>
-                                <p className="text-muted-foreground">{result.medicine.dosage}</p>
+                                <span className="font-medium">Category:</span>
+                                <p className="text-muted-foreground">{result.medicine.category}</p>
                               </div>
                               <div>
-                                <span className="font-medium">Form:</span>
-                                <p className="text-muted-foreground">{result.medicine.form}</p>
+                                <span className="font-medium">WHO Approved:</span>
+                                <p className="text-muted-foreground">{result.medicine.who_approved ? 'Yes' : 'No'}</p>
                               </div>
                               <div>
-                                <span className="font-medium">Safety Score:</span>
-                                <p className="text-muted-foreground">{result.medicine.safety_score}/100</p>
+                                <span className="font-medium">Status:</span>
+                                <p className="text-muted-foreground">{result.medicine.authenticity_status}</p>
                               </div>
                             </div>
                             <div>
@@ -412,16 +474,14 @@ const Dashboard = () => {
                             </div>
                             <div>
                               <span className="font-medium">Registration:</span>
-                              <p className="text-muted-foreground">{result.medicine.registration_no}</p>
+                              <p className="text-muted-foreground">{result.medicine.registration_number}</p>
                             </div>
-                            <div>
-                              <span className="font-medium">Indications:</span>
-                              <p className="text-muted-foreground">{result.medicine.indications}</p>
-                            </div>
-                            <div>
-                              <span className="font-medium">Side Effects:</span>
-                              <p className="text-muted-foreground">{result.medicine.side_effects}</p>
-                            </div>
+                            {result.medicine.side_effects && result.medicine.side_effects.length > 0 && (
+                              <div>
+                                <span className="font-medium">Side Effects:</span>
+                                <p className="text-muted-foreground">{result.medicine.side_effects.join(', ')}</p>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -450,17 +510,17 @@ const Dashboard = () => {
                                 </p>
                                 <div className="space-y-2">
                                   {result.alternatives.map((alt: any, altIdx: number) => (
-                                    <div key={altIdx} className="p-3 bg-background rounded-md border">
-                                      <div className="flex items-start justify-between mb-1">
-                                        <p className="font-medium text-sm">{alt.name}</p>
-                                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded">
-                                          Score: {alt.safety_score}/100
-                                        </span>
-                                      </div>
-                                      <p className="text-xs text-muted-foreground">
-                                        {alt.generic_name} - {alt.manufacturer}
-                                      </p>
+                                  <div key={altIdx} className="p-3 bg-background rounded-md border">
+                                    <div className="flex items-start justify-between mb-1">
+                                      <p className="font-medium text-sm">{alt.name}</p>
+                                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                                        {alt.category}
+                                      </span>
                                     </div>
+                                    <p className="text-xs text-muted-foreground">
+                                      {alt.generic_name} - {alt.manufacturer}
+                                    </p>
+                                  </div>
                                   ))}
                                 </div>
                               </div>

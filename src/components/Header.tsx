@@ -122,7 +122,7 @@ const Header = () => {
                   <ScanLine className="mr-2 h-4 w-4" />
                   Scan History
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                <DropdownMenuItem onClick={() => navigate("/verification-history")}>
                   <History className="mr-2 h-4 w-4" />
                   Verification History
                 </DropdownMenuItem>
@@ -201,7 +201,7 @@ const Header = () => {
                     variant="ghost"
                     className="w-full justify-start"
                     onClick={() => {
-                      navigate("/dashboard");
+                      navigate("/verification-history");
                       setMobileMenuOpen(false);
                     }}
                   >
