@@ -50,17 +50,24 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Gradient */
+    /* Premium Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(157 44% 43%), hsl(205 98% 43%));
     --gradient-hero: linear-gradient(135deg, hsl(157 44% 43% / 0.1), hsl(205 98% 43% / 0.1));
+    --gradient-premium: linear-gradient(135deg, hsl(157 44% 50%), hsl(205 98% 50%), hsl(265 60% 60%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(157 44% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(205 98% 43% / 0.2), hsl(157 44% 43% / 0.2));
 
-    /* Shadows */
+    /* Premium Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(157 44% 43% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(157 44% 43% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(157 44% 43% / 0.15);
+    --shadow-md: 0 4px 6px -1px hsl(157 44% 43% / 0.1), 0 2px 4px -1px hsl(205 98% 43% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(157 44% 43% / 0.15), 0 4px 6px -2px hsl(205 98% 43% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(157 44% 43% / 0.2), 0 10px 10px -5px hsl(205 98% 43% / 0.1);
+    --shadow-glow: 0 0 20px hsl(157 44% 43% / 0.3), 0 0 40px hsl(205 98% 43% / 0.2);
 
-    /* Transitions */
+    /* Premium Transitions */
     --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
   .dark {
@@ -172,12 +179,50 @@ All colors MUST be HSL.
     scroll-behavior: smooth;
   }
 
-  /* Background gradients */
+  /* Premium Background gradients */
   .bg-gradient-primary {
     background: var(--gradient-primary);
   }
 
   .bg-gradient-hero {
     background: var(--gradient-hero);
+  }
+
+  .bg-gradient-premium {
+    background: var(--gradient-premium);
+  }
+
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  /* Premium effects */
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    background: hsl(0 0% 100% / 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(0 0% 100% / 0.2);
+  }
+
+  .dark .glass {
+    background: hsl(0 0% 10% / 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(0 0% 100% / 0.1);
   }
 }

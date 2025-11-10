@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertTriangle, Loader2, Camera, ScanLine } from "lucide-react";
 
 interface ScannerProps {
   onScanComplete?: (result: { text: string; format: string }) => void;
@@ -15,6 +15,7 @@ const Scanner = ({ onScanComplete }: ScannerProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [scannerError, setScannerError] = useState(false);
   const elementId = "qr-reader";
 
   useEffect(() => {
@@ -149,6 +150,7 @@ Your safety is our priority. Always verify medicines before use.`
   const startScanner = async () => {
     try {
       setVerificationResult(null);
+      setScannerError(false);
       const scanner = new Html5Qrcode(elementId);
       scannerRef.current = scanner;
 
@@ -167,9 +169,11 @@ Your safety is our priority. Always verify medicines before use.`
       setIsScanning(true);
     } catch (error) {
       console.error("Error starting scanner:", error);
+      setScannerError(true);
+      setIsScanning(false);
       toast({
-        title: "Scanner Error",
-        description: "Could not start scanner. Please check camera permissions.",
+        title: "Scanner Not Available",
+        description: "Camera scanner is not available in preview mode. Please use manual search or try on published app.",
         variant: "destructive",
       });
     }
@@ -189,7 +193,28 @@ Your safety is our priority. Always verify medicines before use.`
 
   return (
     <div className="space-y-4">
-      <div id={elementId} className="w-full rounded-lg overflow-hidden border-2 border-border" />
+      {scannerError && (
+        <div className="p-4 bg-warning/10 border border-warning rounded-lg flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-warning-foreground">Scanner Not Available</p>
+            <p className="text-xs text-muted-foreground mt-1">QR/Barcode scanner is not available in preview mode. Please use the "Manual Search" option instead, or try this feature on the published app.</p>
+          </div>
+        </div>
+      )}
+      
+      <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 bg-gradient-accent">
+        <div id={elementId} className="w-full rounded-lg overflow-hidden" />
+        
+        {!isScanning && !verificationResult && !scannerError && (
+          <div className="text-center py-8">
+            <ScanLine className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <p className="text-sm text-muted-foreground mb-4">
+              Position QR code or barcode within frame
+            </p>
+          </div>
+        )}
+      </div>
       
       {isVerifying && (
         <Card className="p-4 bg-secondary/10">
@@ -256,8 +281,9 @@ Your safety is our priority. Always verify medicines before use.`
         <Button
           onClick={startScanner}
           disabled={isScanning}
-          className="flex-1"
+          className="flex-1 shadow-md hover:shadow-glow transition-smooth"
         >
+          <Camera className="h-4 w-4 mr-2" />
           {isScanning ? "Scanning..." : "Start Scanner"}
         </Button>
         {isScanning && (

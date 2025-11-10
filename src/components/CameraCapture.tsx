@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, X } from "lucide-react";
+import { Camera, X, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface CameraCaptureProps {
   onCapture: (file: File) => void;
@@ -12,9 +13,12 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState(false);
+  const { toast } = useToast();
 
   const startCamera = async () => {
     try {
+      setCameraError(false);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" }, // Use back camera on mobile
         audio: false,
@@ -27,7 +31,12 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
       }
     } catch (error) {
       console.error("Error accessing camera:", error);
-      alert("Could not access camera. Please ensure camera permissions are granted.");
+      setCameraError(true);
+      toast({
+        title: "Camera Not Available",
+        description: "Camera access is not available in preview mode. Please use file upload or try on a published app.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -72,6 +81,16 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
 
   return (
     <div className="space-y-4">
+      {cameraError && (
+        <div className="p-4 bg-warning/10 border border-warning rounded-lg flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-warning mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-warning-foreground">Camera Not Available</p>
+            <p className="text-xs text-muted-foreground mt-1">Camera access is not available in preview mode. Please use the "Upload File" option instead, or try this feature on the published app.</p>
+          </div>
+        </div>
+      )}
+      
       <div className="border-2 border-dashed border-border rounded-lg overflow-hidden bg-muted/50">
         {capturedImage ? (
           <div className="relative">
