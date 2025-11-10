@@ -340,64 +340,61 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
         {/* Premium Hero Section */}
-        <div className="mb-8 sm:mb-12 text-center relative">
-          <div className="absolute inset-0 bg-gradient-premium opacity-10 blur-3xl" />
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-accent rounded-full mb-4 shadow-md">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium bg-gradient-primary bg-clip-text text-transparent">
-                DRAP Verified System
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 bg-gradient-primary bg-clip-text text-transparent">
-              Medicine Verification Hub
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Advanced AI-powered authentication system for pharmaceutical safety
-            </p>
+        <div className="mb-8 sm:mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4 border border-primary/20">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">
+              DRAP Verified System
+            </span>
           </div>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-foreground">
+            Medicine Verification Hub
+          </h1>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-medium">
+            Advanced AI-powered authentication system for pharmaceutical safety
+          </p>
         </div>
 
         <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-2">
           {/* Upload Section */}
-          <Card className="shadow-xl border-2 border-primary/10 glass transition-smooth hover:shadow-glow">
-            <CardHeader className="bg-gradient-accent">
-              <CardTitle className="flex items-center gap-2 text-primary">
-                <Shield className="h-6 w-6" />
+          <Card className="shadow-lg border border-border bg-card transition-smooth hover:shadow-xl">
+            <CardHeader className="border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-2 text-foreground text-xl">
+                <Shield className="h-6 w-6 text-primary" />
                 Verification Methods
               </CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm font-medium">
                 Multiple ways to verify medicine authenticity
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               <Tabs defaultValue="manual" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-auto p-1">
-                  <TabsTrigger value="manual" className="text-xs py-2">
-                    <Search className="h-3 w-3 mr-1" />
+                <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted">
+                  <TabsTrigger value="manual" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
+                    <Search className="h-4 w-4 mr-1" />
                     Search
                   </TabsTrigger>
-                  <TabsTrigger value="upload" className="text-xs py-2">
-                    <Upload className="h-3 w-3 mr-1" />
+                  <TabsTrigger value="upload" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
+                    <Upload className="h-4 w-4 mr-1" />
                     Upload
                   </TabsTrigger>
-                  <TabsTrigger value="qr" className="text-xs py-2">
-                    <ScanLine className="h-3 w-3 mr-1" />
+                  <TabsTrigger value="qr" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
+                    <ScanLine className="h-4 w-4 mr-1" />
                     QR Scan
                   </TabsTrigger>
-                  <TabsTrigger value="camera" className="text-xs py-2">
-                    <Camera className="h-3 w-3 mr-1" />
+                  <TabsTrigger value="camera" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
+                    <Camera className="h-4 w-4 mr-1" />
                     Camera
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="manual" className="space-y-4">
-                  <div className="p-6 border-2 border-dashed border-primary/30 rounded-lg bg-gradient-accent">
-                    <Search className="h-10 w-10 mx-auto mb-4 text-primary" />
-                    <p className="text-sm text-center text-muted-foreground mb-4">
+                <TabsContent value="manual" className="space-y-4 mt-4">
+                  <div className="p-6 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+                    <Search className="h-12 w-12 mx-auto mb-4 text-primary" />
+                    <p className="text-sm text-center text-foreground font-medium mb-4">
                       Enter medicine name to verify authenticity
                     </p>
                     <div className="flex gap-2">
@@ -406,17 +403,17 @@ const Dashboard = () => {
                         value={manualSearchQuery}
                         onChange={(e) => setManualSearchQuery(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleManualSearch()}
-                        className="flex-1"
+                        className="flex-1 bg-background"
                       />
-                      <Button onClick={handleManualSearch} disabled={isVerifying}>
+                      <Button onClick={handleManualSearch} disabled={isVerifying} className="bg-primary text-primary-foreground hover:bg-primary/90">
                         <Search className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="upload" className="space-y-4">
-                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary transition-smooth bg-gradient-accent">
+                <TabsContent value="upload" className="space-y-4 mt-4">
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary hover:bg-primary/5 transition-smooth bg-muted/30">
                     <input
                       type="file"
                       accept="image/*,.pdf"
@@ -426,10 +423,10 @@ const Dashboard = () => {
                     />
                     <label htmlFor="file-upload" className="cursor-pointer">
                       <Upload className="h-12 w-12 mx-auto mb-4 text-primary" />
-                      <p className="text-sm font-medium text-foreground">
+                      <p className="text-base font-semibold text-foreground">
                         Click to upload prescription or medicine image
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">
+                      <p className="text-sm text-muted-foreground mt-2 font-medium">
                         PNG, JPG, PDF up to 10MB
                       </p>
                     </label>
@@ -459,23 +456,23 @@ const Dashboard = () => {
               </Tabs>
 
               {isScanning && (
-                <div className="p-4 bg-gradient-accent rounded-lg text-center border border-primary/20">
-                  <div className="animate-spin h-8 w-8 border-3 border-primary border-t-transparent rounded-full mx-auto mb-3" />
-                  <p className="text-sm font-medium">Processing with AI OCR...</p>
+                <div className="p-6 bg-primary/10 rounded-lg text-center border border-primary/30">
+                  <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full mx-auto mb-3" />
+                  <p className="text-base font-semibold text-foreground">Processing with AI OCR...</p>
                 </div>
               )}
 
               {ocrText && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <CheckCircle className="h-4 w-4 text-success" />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <CheckCircle className="h-5 w-5 text-success" />
                     Extracted Information:
                   </div>
-                  <div className="p-4 bg-gradient-card rounded-lg text-sm border border-primary/20">
+                  <div className="p-4 bg-muted rounded-lg text-sm border border-border font-medium text-foreground">
                     {ocrText}
                   </div>
-                  <Button onClick={handleVerify} className="w-full shadow-md hover:shadow-glow transition-smooth">
-                    <Shield className="h-4 w-4 mr-2" />
+                  <Button onClick={handleVerify} className="w-full shadow-md hover:shadow-lg transition-smooth bg-primary text-primary-foreground text-base h-11">
+                    <Shield className="h-5 w-5 mr-2" />
                     Verify Against DRAP Database
                   </Button>
                 </div>
@@ -484,13 +481,13 @@ const Dashboard = () => {
           </Card>
 
           {/* Results Section */}
-          <Card className="shadow-xl border-2 border-secondary/10 glass transition-smooth hover:shadow-glow">
-            <CardHeader className="bg-gradient-accent">
-              <CardTitle className="flex items-center gap-2 text-secondary">
+          <Card className="shadow-lg border border-border bg-card transition-smooth hover:shadow-xl">
+            <CardHeader className="border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-2 text-foreground text-xl">
                 <CheckCircle className="h-6 w-6" />
                 Verification Results
               </CardTitle>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm font-medium">
                 Real-time DRAP database verification
               </CardDescription>
             </CardHeader>
@@ -501,21 +498,21 @@ const Dashboard = () => {
                     <div className="animate-spin h-16 w-16 border-4 border-primary border-t-transparent rounded-full" />
                     <Shield className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
                   </div>
-                  <p className="text-sm font-medium">Analyzing against DRAP database...</p>
-                  <p className="text-xs text-muted-foreground mt-2">This may take a few moments</p>
+                  <p className="text-base font-semibold text-foreground">Analyzing against DRAP database...</p>
+                  <p className="text-sm text-muted-foreground mt-2">This may take a few moments</p>
                 </div>
               ) : verificationResults.length > 0 ? (
                 <div className="space-y-4">
                   {verificationResults.map((result, idx) => (
-                    <div key={idx} className="border-2 rounded-xl overflow-hidden shadow-md transition-smooth hover:shadow-lg" style={{
+                    <div key={idx} className="border-2 rounded-xl overflow-hidden shadow-md transition-smooth hover:shadow-lg bg-card" style={{
                       borderColor: result.registered ? 'hsl(157 44% 43%)' : 'hsl(38 92% 50%)'
                     }}>
-                      <div className={`p-5 space-y-4 ${result.registered ? 'bg-gradient-card' : 'bg-warning/5'}`}>
+                      <div className={`p-5 space-y-4 ${result.registered ? 'bg-success/5' : 'bg-warning/5'}`}>
                         <div className="flex items-start justify-between">
-                          <h3 className="font-bold text-lg flex items-center gap-2">
+                          <h3 className="font-bold text-lg flex items-center gap-2 text-foreground">
                             {result.name}
                             {result.registered && (
-                              <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-full">DRAP Verified</span>
+                              <span className="text-xs bg-success text-success-foreground px-2.5 py-1 rounded-full font-semibold">DRAP Verified</span>
                             )}
                           </h3>
                           {result.registered ? (
@@ -526,37 +523,37 @@ const Dashboard = () => {
                         </div>
 
                         {result.found && result.medicine && (
-                          <div className="space-y-2 text-sm">
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <span className="font-medium">Generic:</span>
-                                <p className="text-muted-foreground">{result.medicine.generic_name}</p>
+                          <div className="space-y-3 text-sm">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-muted/50 p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">Generic:</span>
+                                <p className="text-foreground">{result.medicine.generic_name}</p>
                               </div>
-                              <div>
-                                <span className="font-medium">Category:</span>
-                                <p className="text-muted-foreground">{result.medicine.category}</p>
+                              <div className="bg-muted/50 p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">Category:</span>
+                                <p className="text-foreground">{result.medicine.category}</p>
                               </div>
-                              <div>
-                                <span className="font-medium">WHO Approved:</span>
-                                <p className="text-muted-foreground">{result.medicine.who_approved ? 'Yes' : 'No'}</p>
+                              <div className="bg-muted/50 p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">WHO Approved:</span>
+                                <p className="text-foreground">{result.medicine.who_approved ? 'Yes' : 'No'}</p>
                               </div>
-                              <div>
-                                <span className="font-medium">Status:</span>
-                                <p className="text-muted-foreground">{result.medicine.authenticity_status}</p>
+                              <div className="bg-muted/50 p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">Status:</span>
+                                <p className="text-foreground">{result.medicine.authenticity_status}</p>
                               </div>
                             </div>
-                            <div>
-                              <span className="font-medium">Manufacturer:</span>
-                              <p className="text-muted-foreground">{result.medicine.manufacturer}</p>
+                            <div className="bg-muted/50 p-3 rounded-lg">
+                              <span className="font-semibold text-foreground block mb-1">Manufacturer:</span>
+                              <p className="text-foreground">{result.medicine.manufacturer}</p>
                             </div>
-                            <div>
-                              <span className="font-medium">Registration:</span>
-                              <p className="text-muted-foreground">{result.medicine.registration_number}</p>
+                            <div className="bg-muted/50 p-3 rounded-lg">
+                              <span className="font-semibold text-foreground block mb-1">Registration:</span>
+                              <p className="text-foreground">{result.medicine.registration_number}</p>
                             </div>
                             {result.medicine.side_effects && result.medicine.side_effects.length > 0 && (
-                              <div>
-                                <span className="font-medium">Side Effects:</span>
-                                <p className="text-muted-foreground">{result.medicine.side_effects.join(', ')}</p>
+                              <div className="bg-muted/50 p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">Side Effects:</span>
+                                <p className="text-foreground">{result.medicine.side_effects.join(', ')}</p>
                               </div>
                             )}
                           </div>
@@ -564,16 +561,16 @@ const Dashboard = () => {
 
                         {!result.found && (
                           <div className="space-y-3">
-                            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
-                              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                            <div className="p-4 bg-warning/10 border border-warning/30 rounded-lg">
+                              <p className="text-sm font-semibold text-foreground">
                                 ⚠️ Not found in DRAP database
                               </p>
                             </div>
 
                             {result.ai_analysis && (
-                              <div className="space-y-2">
-                                <p className="font-medium text-sm">AI Analysis:</p>
-                                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                              <div className="space-y-2 bg-muted/50 p-3 rounded-lg">
+                                <p className="font-semibold text-sm text-foreground">AI Analysis:</p>
+                                <p className="text-sm text-foreground whitespace-pre-line">
                                   {result.ai_analysis}
                                 </p>
                               </div>
@@ -581,20 +578,20 @@ const Dashboard = () => {
 
                             {result.alternatives && result.alternatives.length > 0 && (
                               <div className="space-y-2">
-                                <p className="font-medium text-sm flex items-center gap-2">
+                                <p className="font-semibold text-sm flex items-center gap-2 text-foreground">
                                   <Pill className="h-4 w-4" />
                                   Suggested Alternatives:
                                 </p>
                                 <div className="space-y-2">
                                   {result.alternatives.map((alt: any, altIdx: number) => (
-                                  <div key={altIdx} className="p-3 bg-background rounded-md border">
+                                  <div key={altIdx} className="p-3 bg-muted/50 rounded-lg border border-border">
                                     <div className="flex items-start justify-between mb-1">
-                                      <p className="font-medium text-sm">{alt.name}</p>
-                                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                                      <p className="font-semibold text-sm text-foreground">{alt.name}</p>
+                                      <span className="text-xs bg-success text-success-foreground px-2 py-1 rounded font-medium">
                                         {alt.category}
                                       </span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-sm text-foreground">
                                       {alt.generic_name} - {alt.manufacturer}
                                     </p>
                                   </div>
@@ -609,13 +606,13 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16 text-muted-foreground">
+                <div className="text-center py-16">
                   <div className="relative mx-auto w-20 h-20 mb-6">
-                    <Shield className="h-20 w-20 mx-auto opacity-10" />
-                    <Sparkles className="absolute top-0 right-0 h-6 w-6 text-primary opacity-50" />
+                    <Shield className="h-20 w-20 mx-auto text-muted-foreground/20" />
+                    <Sparkles className="absolute top-0 right-0 h-6 w-6 text-primary" />
                   </div>
-                  <p className="font-medium">No verification performed yet</p>
-                  <p className="text-sm mt-2">Use any method to verify medicines</p>
+                  <p className="font-semibold text-foreground text-base">No verification performed yet</p>
+                  <p className="text-sm mt-2 text-muted-foreground font-medium">Use any method to verify medicines</p>
                 </div>
               )}
             </CardContent>
@@ -623,29 +620,29 @@ const Dashboard = () => {
         </div>
 
         {/* Past Checks */}
-        <Card className="mt-8 shadow-xl border-2 border-accent/10 glass">
-          <CardHeader className="bg-gradient-accent">
-            <CardTitle className="flex items-center gap-2">
-              <Pill className="h-5 w-5 text-accent" />
+        <Card className="mt-8 shadow-lg border border-border bg-card">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="flex items-center gap-2 text-foreground text-xl">
+              <Pill className="h-6 w-6 text-primary" />
               Recent Verifications
             </CardTitle>
-            <CardDescription>Your complete prescription check history</CardDescription>
+            <CardDescription className="font-medium">Your complete prescription check history</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             {recentVerifications.length > 0 ? (
               <div className="space-y-3">
                 {recentVerifications.map((verification) => (
-                  <div key={verification.id} className="flex items-center justify-between p-4 border-2 rounded-lg hover:shadow-md transition-smooth bg-gradient-card">
+                  <div key={verification.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-smooth bg-muted/30 border-border">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold">{verification.medicine_name}</p>
+                        <p className="font-semibold text-foreground">{verification.medicine_name}</p>
                         {verification.verification_status === 'verified' ? (
                           <CheckCircle className="h-5 w-5 text-success" />
                         ) : (
                           <AlertTriangle className="h-5 w-5 text-warning" />
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground font-medium">
                         {new Date(verification.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'short',
@@ -656,10 +653,10 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <div className="text-sm">
-                      <span className={`px-3 py-1.5 rounded-full font-medium shadow-sm ${
+                      <span className={`px-3 py-1.5 rounded-full font-semibold shadow-sm ${
                         verification.verification_status === 'verified' 
-                          ? 'bg-success/20 text-success border border-success/30'
-                          : 'bg-warning/20 text-warning border border-warning/30'
+                          ? 'bg-success text-success-foreground'
+                          : 'bg-warning text-warning-foreground'
                       }`}>
                         {verification.verification_status === 'verified' ? '✓ Verified' : '⚠ Not Found'}
                       </span>
@@ -668,10 +665,10 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Shield className="h-16 w-16 mx-auto mb-4 opacity-10" />
-                <p className="font-medium">No verification history yet</p>
-                <p className="text-sm mt-2">Start verifying medicines to build your history</p>
+              <div className="text-center py-12">
+                <Shield className="h-16 w-16 mx-auto mb-4 text-muted-foreground/20" />
+                <p className="font-semibold text-foreground">No verification history yet</p>
+                <p className="text-sm mt-2 text-muted-foreground font-medium">Start verifying medicines to build your history</p>
               </div>
             )}
           </CardContent>

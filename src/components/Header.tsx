@@ -69,12 +69,12 @@ const Header = () => {
     : [...publicNavLinks, { name: "Sign In", path: "/auth" }];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm">
       <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img src={logo} alt="RxAegis" className="h-8 w-auto object-contain" />
-          <span className="font-bold text-xl hidden sm:inline">RxAegis</span>
+          <span className="font-bold text-xl hidden sm:inline text-foreground">RxAegis</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -83,10 +83,10 @@ const Header = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
+              className={`text-sm font-semibold transition-colors hover:text-primary ${
                 isActive(link.path)
                   ? "text-primary"
-                  : "text-muted-foreground"
+                  : "text-foreground"
               }`}
             >
               {link.name}
