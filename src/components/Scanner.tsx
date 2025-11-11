@@ -131,6 +131,9 @@ Your safety is our priority. Always verify medicines before use.`
   const handleScan = async (decodedText: string, decodedResult: any) => {
     console.log("Scan result:", decodedText);
     
+    // Stop scanner immediately after successful scan to prevent continuous blinking
+    await stopScanner();
+    
     // Immediately verify the scanned barcode
     await verifyMedicine(decodedText);
     
@@ -210,11 +213,11 @@ Your safety is our priority. Always verify medicines before use.`
   return (
     <div className="space-y-4">
       {scannerError && (
-        <div className="p-4 bg-warning/10 border border-warning rounded-lg flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-warning-foreground">Scanner Not Available</p>
-            <p className="text-xs text-muted-foreground mt-1">QR/Barcode scanner is not available in preview mode. Please use the "Manual Search" option instead, or try this feature on the published app.</p>
+        <div className="p-3 sm:p-4 bg-warning/10 border border-warning rounded-lg flex items-start gap-2 sm:gap-3">
+          <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-warning mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-warning-foreground">Scanner Not Available</p>
+            <p className="text-xs text-muted-foreground mt-1">QR/Barcode scanner is not available in preview mode. Please use "Manual Search" or access the published app for full scanner functionality.</p>
           </div>
         </div>
       )}
@@ -242,21 +245,21 @@ Your safety is our priority. Always verify medicines before use.`
       )}
 
       {verificationResult && (
-        <Card className={`p-6 border-2 ${
+        <Card className={`p-4 sm:p-6 border-2 ${
           verificationResult.status === 'authentic' 
             ? 'bg-green-50 dark:bg-green-900/20 border-green-600' 
             : 'bg-red-50 dark:bg-red-900/20 border-red-600'
         }`}>
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2 sm:gap-3">
               {verificationResult.status === 'authentic' ? (
-                <CheckCircle className="h-8 w-8 text-green-600 flex-shrink-0 mt-1" />
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0 mt-1" />
               ) : (
-                <AlertTriangle className="h-8 w-8 text-red-600 flex-shrink-0 mt-1" />
+                <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 flex-shrink-0 mt-1" />
               )}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <h3 className={`text-xl font-bold ${
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+                  <h3 className={`text-base sm:text-xl font-bold ${
                     verificationResult.status === 'authentic' 
                       ? 'text-green-800 dark:text-green-200' 
                       : 'text-red-800 dark:text-red-200'
@@ -264,7 +267,7 @@ Your safety is our priority. Always verify medicines before use.`
                     {verificationResult.message}
                   </h3>
                   {verificationResult.confidence && (
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold self-start ${
                       verificationResult.status === 'authentic'
                         ? 'bg-green-600 text-white'
                         : 'bg-red-600 text-white'
@@ -273,7 +276,7 @@ Your safety is our priority. Always verify medicines before use.`
                     </span>
                   )}
                 </div>
-                <div className={`text-sm whitespace-pre-line ${
+                <div className={`text-xs sm:text-sm whitespace-pre-line ${
                   verificationResult.status === 'authentic' 
                     ? 'text-green-700 dark:text-green-300' 
                     : 'text-red-700 dark:text-red-300'
@@ -284,12 +287,12 @@ Your safety is our priority. Always verify medicines before use.`
             </div>
 
             {verificationResult.medicine && (
-              <div className="mt-4 p-4 bg-background rounded-md space-y-2">
-                <h4 className="font-semibold text-sm">Additional Information:</h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="mt-4 p-3 sm:p-4 bg-background rounded-md space-y-2">
+                <h4 className="font-semibold text-xs sm:text-sm">Additional Information:</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                   <div>
                     <span className="font-medium">Dosage Form:</span>
-                    <p className="text-muted-foreground">{verificationResult.medicine.category}</p>
+                    <p className="text-muted-foreground truncate">{verificationResult.medicine.category}</p>
                   </div>
                   <div>
                     <span className="font-medium">WHO Approved:</span>
@@ -308,13 +311,13 @@ Your safety is our priority. Always verify medicines before use.`
         <Button
           onClick={startScanner}
           disabled={isScanning}
-          className="flex-1 shadow-md hover:shadow-glow transition-smooth"
+          className="flex-1 shadow-md hover:shadow-glow transition-smooth text-sm sm:text-base"
         >
           <Camera className="h-4 w-4 mr-2" />
           {isScanning ? "Scanning..." : "Start Scanner"}
         </Button>
         {isScanning && (
-          <Button onClick={stopScanner} variant="destructive">
+          <Button onClick={stopScanner} variant="destructive" className="text-sm sm:text-base">
             Stop Scanner
           </Button>
         )}

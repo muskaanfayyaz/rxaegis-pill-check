@@ -108,6 +108,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    min-width: 320px;
   }
 }
 

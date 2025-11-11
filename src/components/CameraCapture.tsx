@@ -82,11 +82,11 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
   return (
     <div className="space-y-4">
       {cameraError && (
-        <div className="p-4 bg-warning/10 border border-warning rounded-lg flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-warning mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-warning-foreground">Camera Not Available</p>
-            <p className="text-xs text-muted-foreground mt-1">Camera access is not available in preview mode. Please use the "Upload File" option instead, or try this feature on the published app.</p>
+        <div className="p-3 sm:p-4 bg-warning/10 border border-warning rounded-lg flex items-start gap-2 sm:gap-3">
+          <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-warning-foreground">Camera Not Available</p>
+            <p className="text-xs text-muted-foreground mt-1">Camera access is restricted in preview mode. Please use "Upload File" or access the published app for full camera functionality.</p>
           </div>
         </div>
       )}
