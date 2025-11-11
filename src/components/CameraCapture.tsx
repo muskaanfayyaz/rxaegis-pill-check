@@ -19,6 +19,7 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
   const startCamera = async () => {
     try {
       setCameraError(false);
+      setCapturedImage(null);
       
       // Check if getUserMedia is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -26,12 +27,17 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
       }
       
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }, // Use back camera on mobile
+        video: { 
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
         audio: false,
       });
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        await videoRef.current.play();
         setStream(mediaStream);
         setIsCameraActive(true);
       }

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Search, AlertTriangle, CheckCircle, Globe, Smartphone } from "lucide-react";
+import { Shield, Search, AlertTriangle, CheckCircle, Globe, Smartphone, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
@@ -9,27 +9,43 @@ const Index = () => {
     <div className="bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-hero border-b">
-        <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24">
-          <div className="text-center max-w-4xl mx-auto">
-            <img src={logo} alt="RxAegis" className="h-16 sm:h-20 md:h-24 mx-auto mb-6 sm:mb-8 object-contain" />
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-foreground px-4">
-              Verify Your Medicines with Confidence
+        <div className="absolute inset-0 bg-gradient-subtle opacity-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,hsl(var(--accent)/0.1),transparent_50%)]" />
+        
+        <div className="container relative mx-auto px-4 py-16 sm:py-20 md:py-24 lg:py-32">
+          <div className="text-center max-w-5xl mx-auto">
+            <div className="inline-block p-1 rounded-2xl bg-gradient-primary mb-6 sm:mb-8 shadow-glow animate-fade-in">
+              <img src={logo} alt="RxAegis" className="h-20 sm:h-24 md:h-28 lg:h-32 mx-auto object-contain" />
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 text-foreground px-4 leading-tight animate-fade-in">
+              Verify Your Medicines with{" "}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">
+                Confidence
+              </span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
+            
+            <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 mb-6 sm:mb-8 max-w-3xl mx-auto px-4 leading-relaxed animate-fade-in">
               RxAegis helps you verify medicine authenticity against Pakistan's DRAP database. 
               Upload prescriptions, scan packages, and ensure your health safety.
             </p>
-            <p className="text-sm sm:text-base font-semibold text-primary mb-6 sm:mb-8 px-4">
-              🇵🇰 An idea made in Pakistan for Pakistan
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+            
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 sm:mb-10 animate-fade-in">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <p className="text-sm sm:text-base font-semibold text-primary">
+                🇵🇰 An idea made in Pakistan for Pakistan
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4 animate-fade-in">
               <Link to="/auth" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full shadow-md">
-                  Get Started
+                <Button size="lg" className="w-full h-12 sm:h-14 text-base sm:text-lg shadow-glow hover:shadow-xl transition-smooth hover-scale">
+                  Get Started Free
                 </Button>
               </Link>
               <Link to="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full">
+                <Button size="lg" variant="outline" className="w-full h-12 sm:h-14 text-base sm:text-lg glass border-2 hover:bg-background/80 transition-smooth hover-scale">
                   View Demo
                 </Button>
               </Link>
@@ -39,73 +55,93 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
-              Protect Your Health with Smart Verification
+      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.05),transparent_70%)]" />
+        
+        <div className="container relative mx-auto px-4">
+          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+            <div className="inline-block px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <p className="text-sm font-semibold text-primary">Our Features</p>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 px-4 text-foreground">
+              Protect Your Health with{" "}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">
+                Smart Verification
+              </span>
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto px-4">
               Our comprehensive platform ensures every medicine you take is safe, verified, and authentic
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Shield className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>DRAP Verification</CardTitle>
-                <CardDescription>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+            <Card className="glass border-2 shadow-glow hover:shadow-xl transition-smooth hover-scale group">
+              <CardHeader className="p-6 sm:p-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-smooth">
+                  <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-xl sm:text-2xl text-foreground mb-3">DRAP Verification</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-foreground/70 leading-relaxed">
                   Instantly check medicines against Pakistan's official Drug Regulatory Authority database
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Search className="h-12 w-12 text-secondary mb-4" />
-                <CardTitle>Smart OCR Scanning</CardTitle>
-                <CardDescription>
+            <Card className="glass border-2 shadow-glow hover:shadow-xl transition-smooth hover-scale group">
+              <CardHeader className="p-6 sm:p-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-smooth">
+                  <Search className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-xl sm:text-2xl text-foreground mb-3">Smart OCR Scanning</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-foreground/70 leading-relaxed">
                   Advanced text recognition extracts medicine details from prescriptions and packages
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <AlertTriangle className="h-12 w-12 text-warning mb-4" />
-                <CardTitle>Risk Assessment</CardTitle>
-                <CardDescription>
+            <Card className="glass border-2 shadow-glow hover:shadow-xl transition-smooth hover-scale group">
+              <CardHeader className="p-6 sm:p-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-smooth">
+                  <AlertTriangle className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-xl sm:text-2xl text-foreground mb-3">Risk Assessment</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-foreground/70 leading-relaxed">
                   Get detailed risk scores, safety warnings, and verified alternative suggestions
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CheckCircle className="h-12 w-12 text-success mb-4" />
-                <CardTitle>Dosage Information</CardTitle>
-                <CardDescription>
+            <Card className="glass border-2 shadow-glow hover:shadow-xl transition-smooth hover-scale group">
+              <CardHeader className="p-6 sm:p-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-smooth">
+                  <CheckCircle className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-xl sm:text-2xl text-foreground mb-3">Dosage Information</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-foreground/70 leading-relaxed">
                   Access proper dosage guidelines, usage instructions, and frequency recommendations
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Globe className="h-12 w-12 text-accent mb-4" />
-                <CardTitle>Bilingual Support</CardTitle>
-                <CardDescription>
+            <Card className="glass border-2 shadow-glow hover:shadow-xl transition-smooth hover-scale group">
+              <CardHeader className="p-6 sm:p-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-smooth">
+                  <Globe className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-xl sm:text-2xl text-foreground mb-3">Bilingual Support</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-foreground/70 leading-relaxed">
                   Available in both English and Urdu for wider accessibility across Pakistan
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <Smartphone className="h-12 w-12 text-secondary mb-4" />
-                <CardTitle>Mobile Friendly</CardTitle>
-                <CardDescription>
+            <Card className="glass border-2 shadow-glow hover:shadow-xl transition-smooth hover-scale group">
+              <CardHeader className="p-6 sm:p-8">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-smooth">
+                  <Smartphone className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
+                </div>
+                <CardTitle className="text-xl sm:text-2xl text-foreground mb-3">Mobile Friendly</CardTitle>
+                <CardDescription className="text-sm sm:text-base text-foreground/70 leading-relaxed">
                   Fully responsive design works perfectly on smartphones, tablets, and desktops
                 </CardDescription>
               </CardHeader>
@@ -115,45 +151,59 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-hero">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
+      <section className="py-16 sm:py-20 md:py-24 lg:py-32 bg-gradient-hero relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--accent)/0.1),transparent_70%)]" />
+        
+        <div className="container relative mx-auto px-4">
+          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+            <div className="inline-block px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-4">
+              <p className="text-sm font-semibold text-accent">Simple Process</p>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 px-4 text-foreground">
               How RxAegis Works
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
-              Three simple steps to verify your medicines
+            <p className="text-base sm:text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto px-4">
+              Three simple steps to verify your medicines and ensure your safety
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                1
+          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
+            <div className="text-center group">
+              <div className="relative inline-block mb-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-primary rounded-3xl flex items-center justify-center text-3xl sm:text-4xl font-bold mx-auto shadow-glow group-hover:scale-110 transition-smooth">
+                  <span className="text-primary-foreground">1</span>
+                </div>
+                <div className="absolute -inset-2 bg-gradient-primary rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-smooth" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Upload</h3>
-              <p className="text-muted-foreground">
-                Take a photo or upload your prescription or medicine package
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground">Upload</h3>
+              <p className="text-sm sm:text-base text-foreground/70 leading-relaxed px-2">
+                Take a photo or upload your prescription or medicine package using your mobile device
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-secondary text-secondary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                2
+            <div className="text-center group">
+              <div className="relative inline-block mb-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-primary rounded-3xl flex items-center justify-center text-3xl sm:text-4xl font-bold mx-auto shadow-glow group-hover:scale-110 transition-smooth">
+                  <span className="text-primary-foreground">2</span>
+                </div>
+                <div className="absolute -inset-2 bg-gradient-primary rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-smooth" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Scan</h3>
-              <p className="text-muted-foreground">
-                Our AI extracts medicine names and details automatically
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground">Scan</h3>
+              <p className="text-sm sm:text-base text-foreground/70 leading-relaxed px-2">
+                Our advanced AI extracts medicine names and details automatically within seconds
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-success text-success-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                3
+            <div className="text-center group">
+              <div className="relative inline-block mb-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-primary rounded-3xl flex items-center justify-center text-3xl sm:text-4xl font-bold mx-auto shadow-glow group-hover:scale-110 transition-smooth">
+                  <span className="text-primary-foreground">3</span>
+                </div>
+                <div className="absolute -inset-2 bg-gradient-primary rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-smooth" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Verify</h3>
-              <p className="text-muted-foreground">
-                Get instant verification, safety scores, and recommendations
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground">Verify</h3>
+              <p className="text-sm sm:text-base text-foreground/70 leading-relaxed px-2">
+                Get instant verification results, safety scores, and personalized recommendations
               </p>
             </div>
           </div>
@@ -161,24 +211,37 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-3xl mx-auto shadow-lg bg-gradient-primary text-primary-foreground">
-            <CardContent className="p-6 sm:p-8 md:p-10 lg:p-12 text-center">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
-                Start Verifying Your Medicines Today
+      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-subtle" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.15),transparent_70%)]" />
+        
+        <div className="container relative mx-auto px-4">
+          <Card className="max-w-4xl mx-auto shadow-glow border-2 glass overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-primary opacity-5 group-hover:opacity-10 transition-smooth" />
+            <CardContent className="relative p-8 sm:p-10 md:p-12 lg:p-16 text-center">
+              <div className="inline-block px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+                <p className="text-sm font-semibold text-primary">Join Us Today</p>
+              </div>
+              
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-foreground leading-tight">
+                Start Verifying Your{" "}
+                <span className="bg-gradient-primary bg-clip-text text-transparent">
+                  Medicines Today
+                </span>
               </h2>
-              <p className="text-base sm:text-lg mb-6 sm:mb-8 opacity-90">
-                Join thousands of users protecting their health with RxAegis
+              
+              <p className="text-base sm:text-lg md:text-xl text-foreground/70 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of users protecting their health with RxAegis. Get started for free and experience peace of mind.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
                 <Link to="/auth" className="w-full sm:w-auto">
-                  <Button size="lg" variant="secondary" className="w-full shadow-md">
+                  <Button size="lg" className="w-full h-12 sm:h-14 text-base sm:text-lg shadow-glow hover:shadow-xl transition-smooth hover-scale">
                     Sign Up Free
                   </Button>
                 </Link>
                 <Link to="/dashboard" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full bg-white/10 hover:bg-white/20 border-white/20">
+                  <Button size="lg" variant="outline" className="w-full h-12 sm:h-14 text-base sm:text-lg glass border-2 hover:bg-background/80 transition-smooth hover-scale">
                     Try Demo
                   </Button>
                 </Link>

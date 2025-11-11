@@ -134,10 +134,18 @@ Your safety is our priority. Always verify medicines before use.`
   const handleScan = async (decodedText: string, decodedResult: any) => {
     console.log("Scan result:", decodedText);
     
+    // Immediately stop scanner to prevent continuous scanning
+    if (scannerRef.current && isScanning) {
+      try {
+        await scannerRef.current.stop();
+        scannerRef.current = null;
+        setIsScanning(false);
+      } catch (error) {
+        console.error("Error stopping scanner:", error);
+      }
+    }
+    
     try {
-      // Stop scanner immediately after successful scan to prevent continuous blinking
-      await stopScanner();
-      
       // Immediately verify the scanned barcode
       await verifyMedicine(decodedText);
       
@@ -171,7 +179,6 @@ Your safety is our priority. Always verify medicines before use.`
         description: "There was an issue processing your scan. Please try again.",
         variant: "destructive",
       });
-      setIsScanning(false);
     }
   };
 
