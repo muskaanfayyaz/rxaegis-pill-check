@@ -19,6 +19,12 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
   const startCamera = async () => {
     try {
       setCameraError(false);
+      
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera API not supported');
+      }
+      
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" }, // Use back camera on mobile
         audio: false,
@@ -29,12 +35,23 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
         setStream(mediaStream);
         setIsCameraActive(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error accessing camera:", error);
       setCameraError(true);
+      
+      // Detect if mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      let description = "Camera access is not available. ";
+      if (!isMobile) {
+        description = "Camera access is available only on mobile devices. Please use the Upload File option or try this feature on a mobile device.";
+      } else {
+        description = "Camera access is restricted in preview mode. Please use Upload File or access the published app for full camera functionality.";
+      }
+      
       toast({
         title: "Camera Not Available",
-        description: "Camera access is not available in preview mode. Please use file upload or try on a published app.",
+        description,
         variant: "destructive",
       });
     }
@@ -86,7 +103,11 @@ const CameraCapture = ({ onCapture }: CameraCaptureProps) => {
           <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-xs sm:text-sm font-medium text-warning-foreground">Camera Not Available</p>
-            <p className="text-xs text-muted-foreground mt-1">Camera access is restricted in preview mode. Please use "Upload File" or access the published app for full camera functionality.</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                ? "Camera access is restricted in preview mode. Please use 'Upload File' or access the published app for full camera functionality."
+                : "Camera access is available only on mobile devices. Please use 'Upload File' or try this feature on a mobile device."}
+            </p>
           </div>
         </div>
       )}

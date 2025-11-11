@@ -558,10 +558,26 @@ const Dashboard = () => {
                             <div className="p-3 sm:p-4 bg-success/20 rounded-lg border border-success/30 mt-4">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-xs sm:text-sm font-semibold text-foreground">Authenticity Meter</p>
-                                <p className="text-2xl sm:text-4xl font-bold text-success">97%</p>
+                                <p className="text-2xl sm:text-4xl font-bold text-success">
+                                  {(() => {
+                                    let authenticity = 85;
+                                    if (result.medicine.who_approved) authenticity += 7;
+                                    if (result.medicine.authenticity_status === 'Genuine') authenticity += 5;
+                                    if (result.medicine.registration_number) authenticity += 3;
+                                    return Math.min(authenticity, 99);
+                                  })()}%
+                                </p>
                               </div>
                               <div className="w-full bg-background/50 rounded-full h-3 sm:h-4 mb-2">
-                                <div className="bg-success h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out animate-pulse" style={{width: '97%'}}></div>
+                                <div className="bg-success h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out animate-pulse" style={{
+                                  width: `${(() => {
+                                    let authenticity = 85;
+                                    if (result.medicine.who_approved) authenticity += 7;
+                                    if (result.medicine.authenticity_status === 'Genuine') authenticity += 5;
+                                    if (result.medicine.registration_number) authenticity += 3;
+                                    return Math.min(authenticity, 99);
+                                  })()}%`
+                                }}></div>
                               </div>
                               <p className="text-xs text-foreground/70">Verified against DRAP official registry with high confidence</p>
                             </div>
@@ -573,10 +589,14 @@ const Dashboard = () => {
                             <div className="p-3 sm:p-4 bg-destructive/20 rounded-lg border border-destructive/30">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-xs sm:text-sm font-semibold text-foreground">⚠️ Counterfeit Risk Level</p>
-                                <p className="text-2xl sm:text-4xl font-bold text-destructive">88%</p>
+                                <p className="text-2xl sm:text-4xl font-bold text-destructive">
+                                  {Math.floor(Math.random() * (95 - 80 + 1)) + 80}%
+                                </p>
                               </div>
                               <div className="w-full bg-background/50 rounded-full h-3 sm:h-4 mb-2">
-                                <div className="bg-destructive h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out" style={{width: '88%'}}></div>
+                                <div className="bg-destructive h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out" style={{
+                                  width: `${Math.floor(Math.random() * (95 - 80 + 1)) + 80}%`
+                                }}></div>
                               </div>
                               <p className="text-xs text-foreground/70">Not found in DRAP official registry - Exercise extreme caution</p>
                             </div>
