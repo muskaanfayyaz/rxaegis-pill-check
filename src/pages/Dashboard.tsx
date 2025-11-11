@@ -540,7 +540,9 @@ const Dashboard = () => {
                             </div>
                             <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
                               <span className="font-semibold text-foreground block mb-1">Strength / Dosage:</span>
-                              <p className="text-foreground">{result.medicine.strength.join(', ')}</p>
+                              <p className="text-foreground">
+                                {Array.isArray(result.medicine.strength) ? result.medicine.strength.join(', ') : result.medicine.strength || 'N/A'}
+                              </p>
                             </div>
                             <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
                               <span className="font-semibold text-foreground block mb-1">Purpose / Usage:</span>
