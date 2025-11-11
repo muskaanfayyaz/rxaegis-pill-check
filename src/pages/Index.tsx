@@ -2,50 +2,46 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Search, AlertTriangle, CheckCircle, Globe, Smartphone, Sparkles } from "lucide-react";
-import logo from "@/assets/logo.png";
 
 const Index = () => {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-hero border-b">
-        <div className="absolute inset-0 bg-gradient-subtle opacity-50" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,hsl(var(--accent)/0.1),transparent_50%)]" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 border-b border-border/50">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
         
-        <div className="container relative mx-auto px-4 py-16 sm:py-20 md:py-24 lg:py-32">
-          <div className="text-center max-w-5xl mx-auto">
-            <div className="inline-block p-1 rounded-2xl bg-gradient-primary mb-6 sm:mb-8 shadow-glow animate-fade-in">
-              <img src={logo} alt="RxAegis" className="h-20 sm:h-24 md:h-28 lg:h-32 mx-auto object-contain" />
+        <div className="container relative mx-auto px-4 py-20 sm:py-24 md:py-32 lg:py-40">
+          <div className="text-center max-w-6xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-sm mb-8 animate-fade-in shadow-lg">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-sm sm:text-base font-semibold bg-gradient-primary bg-clip-text text-transparent">
+                🇵🇰 An idea made in Pakistan for Pakistan
+              </span>
             </div>
             
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 text-foreground px-4 leading-tight animate-fade-in">
-              Verify Your Medicines with{" "}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">
-                Confidence
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-8 sm:mb-10 px-4 leading-[1.1] animate-fade-in">
+              <span className="text-foreground">Verify Your Medicines</span>
+              <br />
+              <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+                with Confidence
               </span>
             </h1>
             
-            <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 mb-6 sm:mb-8 max-w-3xl mx-auto px-4 leading-relaxed animate-fade-in">
-              RxAegis helps you verify medicine authenticity against Pakistan's DRAP database. 
-              Upload prescriptions, scan packages, and ensure your health safety.
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground mb-10 sm:mb-12 max-w-4xl mx-auto px-4 leading-relaxed animate-fade-in font-medium">
+              Verify medicine authenticity against Pakistan's DRAP database. 
+              <span className="block mt-2 text-foreground/90">Upload prescriptions, scan packages, and ensure your health safety.</span>
             </p>
             
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 sm:mb-10 animate-fade-in">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <p className="text-sm sm:text-base font-semibold text-primary">
-                🇵🇰 An idea made in Pakistan for Pakistan
-              </p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4 animate-fade-in">
-              <Link to="/auth" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full h-12 sm:h-14 text-base sm:text-lg shadow-glow hover:shadow-xl transition-smooth hover-scale">
+            <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 justify-center px-4 animate-fade-in max-w-2xl mx-auto">
+              <Link to="/auth" className="w-full sm:w-auto flex-1">
+                <Button size="lg" className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold shadow-glow hover:shadow-2xl transition-all duration-300 hover:scale-105 bg-gradient-primary border-0">
                   Get Started Free
                 </Button>
               </Link>
-              <Link to="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full h-12 sm:h-14 text-base sm:text-lg glass border-2 hover:bg-background/80 transition-smooth hover-scale">
+              <Link to="/dashboard" className="w-full sm:w-auto flex-1">
+                <Button size="lg" variant="outline" className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold backdrop-blur-sm bg-background/50 border-2 border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-105 text-foreground">
                   View Demo
                 </Button>
               </Link>
