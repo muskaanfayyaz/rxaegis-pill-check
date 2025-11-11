@@ -95,13 +95,9 @@ const Dashboard = () => {
 
       setOcrText(extractedText);
       setIsScanning(false);
-      toast({
-        title: "OCR Complete",
-        description: "Text extracted successfully. Click 'Verify Medicines' to check.",
-      });
       
-      // Auto-verify after OCR
-      await handleVerify();
+      // Auto-verify with the extracted text immediately
+      await verifyMedicineText(extractedText);
     } catch (error) {
       console.error('OCR error:', error);
       setIsScanning(false);
@@ -211,11 +207,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleVerify = async () => {
-    if (!ocrText) {
+  const verifyMedicineText = async (textToVerify: string) => {
+    if (!textToVerify) {
       toast({
         title: "No data to verify",
-        description: "Please upload a prescription first",
+        description: "Please provide medicine information first",
         variant: "destructive",
       });
       return;
@@ -237,21 +233,19 @@ const Dashboard = () => {
     });
 
     try {
-      // Extract medicine names from OCR text
-      const lines = ocrText.split(/[\n\r]+/).map(m => m.trim()).filter(m => m.length > 0);
+      // Extract medicine names from text
+      const lines = textToVerify.split(/[\n\r]+/).map(m => m.trim()).filter(m => m.length > 0);
       
       // Filter to get only valid medicine names
       const medicines = lines.filter(line => {
         // Remove lines that are clearly not medicine names
         if (line.length < 3) return false;
-        if (/^\d+$/.test(line)) return false; // Only numbers
-        if (/^[\d\s\-x]+$/.test(line)) return false; // Only numbers, spaces, dashes, x
-        if (/(tablets?|capsules?|syrup|strip|pack|box)$/i.test(line)) return false; // Ends with common non-medicine words
-        if (/^(for|the|and|with|use|take|as|directed|by|doctor|physician)$/i.test(line)) return false; // Common instruction words
-        
-        // Must contain at least 3 letters
+        if (/^\d+$/.test(line)) return false;
+        if (/^[\d\s\-x]+$/.test(line)) return false;
+        if (/(tablets?|capsules?|syrup|strip|pack|box)$/i.test(line)) return false;
+        if (/^(for|the|and|with|use|take|as|directed|by|doctor|physician)$/i.test(line)) return false;
         return /[a-zA-Z]{3,}/.test(line);
-      }).slice(0, 5); // Limit to 5 medicines
+      }).slice(0, 5);
 
       if (medicines.length === 0) {
         toast({
@@ -264,15 +258,13 @@ const Dashboard = () => {
       }
 
       const results = [];
-
-      // Get authentication session
       const { data: { session } } = await supabase.auth.getSession();
 
       for (const medicine of medicines) {
         const { data, error } = await supabase.functions.invoke('verify-medicine', {
           body: { 
             medicineName: medicine,
-            extractedText: ocrText
+            extractedText: textToVerify
           },
           headers: {
             Authorization: `Bearer ${session?.access_token}`
@@ -281,17 +273,11 @@ const Dashboard = () => {
 
         if (error) {
           console.error('Verification Error:', error);
-          let errorMessage = 'Verification failed';
-          
-          if (error.message?.includes('Authentication required')) {
-            errorMessage = 'Please log in to verify medicines';
-          }
-          
           results.push({
             name: medicine,
             status: "error",
             registered: false,
-            error: errorMessage,
+            error: error.message?.includes('Authentication required') ? 'Please log in to verify medicines' : 'Verification failed',
           });
         } else {
           results.push({
@@ -305,8 +291,6 @@ const Dashboard = () => {
 
       setVerificationResults(results);
       setIsVerifying(false);
-      
-      // Refresh recent verifications
       fetchRecentVerifications(userId);
       
       toast({
@@ -324,6 +308,10 @@ const Dashboard = () => {
     }
   };
 
+  const handleVerify = async () => {
+    await verifyMedicineText(ocrText);
+  };
+
   const handleManualSearch = async () => {
     if (!manualSearchQuery.trim()) {
       toast({
@@ -336,7 +324,7 @@ const Dashboard = () => {
 
     setOcrText(manualSearchQuery);
     setVerificationResults([]);
-    await handleVerify();
+    await verifyMedicineText(manualSearchQuery);
   };
 
   return (
