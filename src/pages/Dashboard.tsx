@@ -538,7 +538,7 @@ const Dashboard = () => {
                               <span className="font-semibold text-foreground block mb-1">Registration:</span>
                               <p className="text-foreground">{result.medicine.registration_number}</p>
                             </div>
-                            {result.medicine.side_effects && result.medicine.side_effects.length > 0 && (
+                            {result.medicine.side_effects && Array.isArray(result.medicine.side_effects) && result.medicine.side_effects.length > 0 && (
                               <div className="bg-muted/50 p-3 rounded-lg">
                                 <span className="font-semibold text-foreground block mb-1">Side Effects:</span>
                                 <p className="text-foreground">{result.medicine.side_effects.join(', ')}</p>
