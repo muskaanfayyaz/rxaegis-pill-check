@@ -514,6 +514,14 @@ const Dashboard = () => {
                           <div className="space-y-3 text-xs sm:text-sm">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                               <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">Status:</span>
+                                <p className="text-foreground font-semibold text-success">Verified</p>
+                              </div>
+                              <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
+                                <span className="font-semibold text-foreground block mb-1">Registration ID:</span>
+                                <p className="text-foreground truncate">{result.medicine.registration_number}</p>
+                              </div>
+                              <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
                                 <span className="font-semibold text-foreground block mb-1">Generic:</span>
                                 <p className="text-foreground truncate">{result.medicine.generic_name}</p>
                               </div>
@@ -521,22 +529,10 @@ const Dashboard = () => {
                                 <span className="font-semibold text-foreground block mb-1">Category:</span>
                                 <p className="text-foreground truncate">{result.medicine.category}</p>
                               </div>
-                              <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
-                                <span className="font-semibold text-foreground block mb-1">WHO Approved:</span>
-                                <p className="text-foreground">{result.medicine.who_approved ? 'Yes' : 'No'}</p>
-                              </div>
-                              <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
-                                <span className="font-semibold text-foreground block mb-1">Status:</span>
-                                <p className="text-foreground truncate">{result.medicine.authenticity_status}</p>
-                              </div>
                             </div>
                             <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
                               <span className="font-semibold text-foreground block mb-1">Manufacturer:</span>
                               <p className="text-foreground">{result.medicine.manufacturer}</p>
-                            </div>
-                            <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
-                              <span className="font-semibold text-foreground block mb-1">Registration ID:</span>
-                              <p className="text-foreground">{result.medicine.registration_number}</p>
                             </div>
                             <div className="bg-muted/50 p-2 sm:p-3 rounded-lg">
                               <span className="font-semibold text-foreground block mb-1">Strength / Dosage:</span>
@@ -569,7 +565,7 @@ const Dashboard = () => {
                                 </p>
                               </div>
                               <div className="w-full bg-background/50 rounded-full h-3 sm:h-4 mb-2">
-                                <div className="bg-success h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out animate-pulse" style={{
+                                <div className="bg-success h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out" style={{
                                   width: `${(() => {
                                     let authenticity = 85;
                                     if (result.medicine.who_approved) authenticity += 7;
@@ -586,16 +582,20 @@ const Dashboard = () => {
 
                         {!result.found && (
                           <div className="space-y-3">
+                            <div className="bg-muted/50 p-2 sm:p-3 rounded-lg mb-3">
+                              <span className="font-semibold text-foreground block mb-1">Status:</span>
+                              <p className="text-foreground font-semibold text-destructive">Counterfeit / Not Verified</p>
+                            </div>
                             <div className="p-3 sm:p-4 bg-destructive/20 rounded-lg border border-destructive/30">
                               <div className="flex items-center justify-between mb-2">
                                 <p className="text-xs sm:text-sm font-semibold text-foreground">⚠️ Counterfeit Risk Level</p>
                                 <p className="text-2xl sm:text-4xl font-bold text-destructive">
-                                  {Math.floor(Math.random() * (95 - 80 + 1)) + 80}%
+                                  {result.counterfeitRisk || 85}%
                                 </p>
                               </div>
                               <div className="w-full bg-background/50 rounded-full h-3 sm:h-4 mb-2">
                                 <div className="bg-destructive h-3 sm:h-4 rounded-full transition-all duration-1000 ease-out" style={{
-                                  width: `${Math.floor(Math.random() * (95 - 80 + 1)) + 80}%`
+                                  width: `${result.counterfeitRisk || 85}%`
                                 }}></div>
                               </div>
                               <p className="text-xs text-foreground/70">Not found in DRAP official registry - Exercise extreme caution</p>

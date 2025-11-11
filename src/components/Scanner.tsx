@@ -50,6 +50,7 @@ const Scanner = ({ onScanComplete }: ScannerProps) => {
         if (medicine.authenticity_status === 'Genuine') confidence += 5;
         if (medicine.registration_number) confidence += 3;
         confidence = Math.min(confidence, 99); // Cap at 99%
+        
         setVerificationResult({
           status: 'authentic',
           confidence: confidence,
@@ -68,8 +69,6 @@ const Scanner = ({ onScanComplete }: ScannerProps) => {
 • Manufacturer: ${medicine.manufacturer}
 • Registration: ${medicine.registration_number}
 • Category: ${medicine.category}
-• WHO Approved: ${medicine.who_approved ? 'Yes ✓' : 'No ✗'}
-• Authenticity Status: ${medicine.authenticity_status}
 
 This product has been verified against Pakistan's official drug regulatory database and is confirmed to be genuine.`
         });
@@ -135,13 +134,13 @@ Your safety is our priority. Always verify medicines before use.`
   const handleScan = async (decodedText: string, decodedResult: any) => {
     console.log("Scan result:", decodedText);
     
-    // Stop scanner immediately after successful scan to prevent continuous blinking
-    await stopScanner();
-    
-    // Immediately verify the scanned barcode
-    await verifyMedicine(decodedText);
-    
     try {
+      // Stop scanner immediately after successful scan to prevent continuous blinking
+      await stopScanner();
+      
+      // Immediately verify the scanned barcode
+      await verifyMedicine(decodedText);
+      
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
@@ -167,6 +166,12 @@ Your safety is our priority. Always verify medicines before use.`
       }
     } catch (error) {
       console.error("Error processing scan:", error);
+      toast({
+        title: "Scan Processing Error",
+        description: "There was an issue processing your scan. Please try again.",
+        variant: "destructive",
+      });
+      setIsScanning(false);
     }
   };
 
@@ -214,13 +219,14 @@ Your safety is our priority. Always verify medicines before use.`
   };
 
   const stopScanner = async () => {
-    if (scannerRef.current) {
+    if (scannerRef.current && isScanning) {
       try {
         await scannerRef.current.stop();
+        scannerRef.current = null;
         setIsScanning(false);
-        setVerificationResult(null);
       } catch (error) {
         console.error("Error stopping scanner:", error);
+        setIsScanning(false);
       }
     }
   };
@@ -310,14 +316,20 @@ Your safety is our priority. Always verify medicines before use.`
                 <h4 className="font-semibold text-xs sm:text-sm">Additional Information:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                   <div>
-                    <span className="font-medium">Dosage Form:</span>
+                    <span className="font-medium">Status:</span>
+                    <p className="text-success font-semibold">Verified</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Registration ID:</span>
+                    <p className="text-muted-foreground truncate">{verificationResult.medicine.registration_number}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Category:</span>
                     <p className="text-muted-foreground truncate">{verificationResult.medicine.category}</p>
                   </div>
                   <div>
-                    <span className="font-medium">WHO Approved:</span>
-                    <p className="text-muted-foreground">
-                      {verificationResult.medicine.who_approved ? 'Yes' : 'No'}
-                    </p>
+                    <span className="font-medium">Manufacturer:</span>
+                    <p className="text-muted-foreground truncate">{verificationResult.medicine.manufacturer}</p>
                   </div>
                 </div>
               </div>
