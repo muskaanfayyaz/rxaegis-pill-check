@@ -2,10 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Search, AlertTriangle, CheckCircle, Globe, Smartphone, Sparkles } from "lucide-react";
-
 const Index = () => {
-  return (
-    <div className="bg-background">
+  return <div className="bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 border-b border-border/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.15),transparent_50%)]" />
@@ -173,7 +171,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground">Upload</h3>
               <p className="text-sm sm:text-base text-foreground/70 leading-relaxed px-2">
-                Take a photo or upload your prescription or medicine package using your mobile device
+                Upload your medicine package using your mobile device or web app      
               </p>
             </div>
 
@@ -246,8 +244,6 @@ const Index = () => {
           </Card>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
