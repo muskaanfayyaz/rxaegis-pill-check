@@ -16,7 +16,7 @@ const Index = () => {
           <div className="text-center max-w-6xl mx-auto">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-sm mb-8 animate-fade-in shadow-lg">
               <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm sm:text-base font-semibold bg-gradient-primary bg-clip-text text-transparent">
+              <span className="text-sm sm:text-base font-semibold text-primary">
                 🇵🇰 An idea made in Pakistan for Pakistan
               </span>
             </div>

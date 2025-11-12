@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Upload, Camera, Shield, AlertTriangle, CheckCircle, Pill, ScanLine, Search, Sparkles } from "lucide-react";
+import { Upload, Shield, AlertTriangle, CheckCircle, Pill, ScanLine, Search, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Scanner from "@/components/Scanner";
-import CameraCapture from "@/components/CameraCapture";
 
 const Dashboard = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -41,71 +40,6 @@ const Dashboard = () => {
 
     if (!error && data) {
       setRecentVerifications(data);
-    }
-  };
-
-  const handleCameraCapture = async (imageFile: File) => {
-    if (!imageFile) return;
-
-    setFile(imageFile);
-    setIsScanning(true);
-    setOcrText("");
-    setVerificationResults([]);
-
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(imageFile);
-      
-      const imageBase64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-      });
-
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const { data: ocrData, error: ocrError } = await supabase.functions.invoke('ocr-extract', {
-        body: { imageBase64 },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        }
-      });
-
-      if (ocrError) {
-        console.error('OCR Error:', ocrError);
-        toast({
-          title: "Scan Failed",
-          description: "Failed to extract text from image. Please try again.",
-          variant: "destructive",
-        });
-        setIsScanning(false);
-        return;
-      }
-
-      const extractedText = ocrData?.extractedText || '';
-      
-      if (!extractedText) {
-        toast({
-          title: "No text found",
-          description: "Could not extract text from the image",
-          variant: "destructive",
-        });
-        setIsScanning(false);
-        return;
-      }
-
-      setOcrText(extractedText);
-      setIsScanning(false);
-      
-      // Auto-verify with the extracted text immediately
-      await verifyMedicineText(extractedText);
-    } catch (error) {
-      console.error('OCR error:', error);
-      setIsScanning(false);
-      toast({
-        title: "OCR Failed",
-        description: "Could not extract text from image",
-        variant: "destructive",
-      });
     }
   };
 
@@ -360,7 +294,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               <Tabs defaultValue="manual" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted">
+                <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted">
                   <TabsTrigger value="manual" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
                     <Search className="h-4 w-4 mr-1" />
                     Search
@@ -372,10 +306,6 @@ const Dashboard = () => {
                   <TabsTrigger value="qr" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
                     <ScanLine className="h-4 w-4 mr-1" />
                     QR Scan
-                  </TabsTrigger>
-                  <TabsTrigger value="camera" className="text-xs py-3 data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold">
-                    <Camera className="h-4 w-4 mr-1" />
-                    Camera
                   </TabsTrigger>
                 </TabsList>
 
@@ -436,10 +366,6 @@ const Dashboard = () => {
                       description: `Scanned: ${result.text.substring(0, 50)}...`,
                     });
                   }} />
-                </TabsContent>
-
-                <TabsContent value="camera" className="space-y-4">
-                  <CameraCapture onCapture={handleCameraCapture} />
                 </TabsContent>
               </Tabs>
 
