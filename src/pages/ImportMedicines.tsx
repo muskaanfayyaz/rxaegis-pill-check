@@ -65,7 +65,23 @@ const ImportMedicines = () => {
 
         if (error) {
           console.error(`Error inserting batch ${batchNumber}:`, error);
+          console.error(`Failed medicine IDs:`, batch.map(m => m.id).join(", "));
           errorCount += batch.length;
+          
+          // Try inserting one by one to find which specific records fail
+          for (const medicine of batch) {
+            const { data: singleData, error: singleError } = await supabase
+              .from("medicines")
+              .insert([medicine])
+              .select();
+            
+            if (singleError) {
+              console.error(`Failed to insert ${medicine.id} (${medicine.name}):`, singleError.message);
+            } else if (singleData) {
+              insertedCount++;
+              errorCount--;
+            }
+          }
         } else if (data) {
           insertedCount += data.length;
         }
