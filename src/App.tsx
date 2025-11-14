@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import ScanHistory from "./pages/ScanHistory";
 import VerificationHistory from "./pages/VerificationHistory";
+import ImportMedicines from "./pages/ImportMedicines";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/scan-history" element={<ScanHistory />} />
               <Route path="/verification-history" element={<VerificationHistory />} />
+              <Route path="/import-medicines" element={<ImportMedicines />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
