@@ -99,8 +99,8 @@ serve(async (req) => {
     // Search for medicine using multiple strategies
     const searchPromises = searchTerms.slice(0, 3).map(term => 
       Promise.all([
-        supabase.from('medicines').select('*').ilike('name', `%${term}%`).limit(10),
-        supabase.from('medicines').select('*').ilike('generic_name', `%${term}%`).limit(10)
+        supabase.from('medicines').select('*').ilike('name', `%${term}%`).limit(200),
+        supabase.from('medicines').select('*').ilike('generic_name', `%${term}%`).limit(200)
       ])
     );
 
