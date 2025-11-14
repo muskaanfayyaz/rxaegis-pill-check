@@ -15,20 +15,26 @@ const ImportMedicines = () => {
     setProgress("Starting import...");
 
     try {
-      // Transform the JSON data to match database schema
+      // Normalize and transform the JSON data to match database schema
+      const toTextArray = (v: any): string[] => {
+        if (Array.isArray(v)) return v.map((x) => String(x));
+        if (v === null || v === undefined || v === "") return [];
+        return [String(v)];
+      };
+
       const transformedMedicines = medicinesData.medicines.map((med: any) => ({
-        id: med.id,
-        name: med.name,
-        generic_name: med.genericName,
-        strength: med.strength,
-        manufacturer: med.manufacturer,
-        registration_number: med.registrationNumber,
-        category: med.category,
-        authenticity_status: med.authenticityStatus,
-        who_approved: med.whoApproved,
-        side_effects: med.sideEffects,
-        alternatives: med.alternatives,
-        barcode: med.barcode,
+        id: String(med.id ?? "").trim(),
+        name: String(med.name ?? "").trim(),
+        generic_name: String(med.genericName ?? med.generic_name ?? "").trim(),
+        strength: toTextArray(med.strength),
+        manufacturer: String(med.manufacturer ?? "").trim(),
+        registration_number: String(med.registrationNumber ?? "").trim(),
+        category: String(med.category ?? "general medicine").trim(),
+        authenticity_status: String(med.authenticityStatus ?? "unknown").trim(),
+        who_approved: med.whoApproved === true,
+        side_effects: toTextArray(med.sideEffects),
+        alternatives: toTextArray(med.alternatives),
+        barcode: String(med.barcode ?? "").trim(),
       }));
 
       setProgress(`Preparing to import ${transformedMedicines.length} medicines...`);
@@ -60,7 +66,7 @@ const ImportMedicines = () => {
 
         const { data, error } = await supabase
           .from("medicines")
-          .insert(batch)
+          .upsert(batch, { onConflict: "id" })
           .select();
 
         if (error) {
@@ -72,7 +78,7 @@ const ImportMedicines = () => {
           for (const medicine of batch) {
             const { data: singleData, error: singleError } = await supabase
               .from("medicines")
-              .insert([medicine])
+              .upsert([medicine], { onConflict: "id" })
               .select();
             
             if (singleError) {
