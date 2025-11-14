@@ -59,7 +59,7 @@ const Index = () => {
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 px-4 text-foreground">
               Protect Your Health with{" "}
-              <span class="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
               Smart Verification
               </span>
 
@@ -152,7 +152,7 @@ const Index = () => {
         <div className="container relative mx-auto px-4">
           <div className="text-center mb-12 sm:mb-16 animate-fade-in">
             <div className="inline-block px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-4">
-              <p className="text-sm font-semibold text-accent">Simple Process</p>
+              <p className="text-sm font-semibold text-primary">Simple Process</p>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 px-4 text-foreground">
               How RxAegis Works
@@ -172,7 +172,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground">Upload</h3>
               <p className="text-sm sm:text-base text-foreground/70 leading-relaxed px-2">
-                Upload your medicine package using your mobile device or web app      
+                Upload your medicine package using your mobile device or web app
               </p>
             </div>
 
@@ -220,7 +220,7 @@ const Index = () => {
               
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-foreground leading-tight">
                 Start Verifying Your{" "}
-                <span className="bg-gradient-primary bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
                   Medicines Today
                 </span>
               </h2>
