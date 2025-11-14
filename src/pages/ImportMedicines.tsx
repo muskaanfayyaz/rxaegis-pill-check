@@ -14,6 +14,24 @@ const ImportMedicines = () => {
     setIsImporting(true);
     setProgress("Starting import...");
 
+    // Prefer server-side import to bypass RLS
+    try {
+      setProgress("Invoking backend import...");
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('import-medicines', { body: {} });
+      if (!fnError && (fnData as any)?.success) {
+        const d = fnData as any;
+        setProgress(`Import completed! Inserted: ${d.inserted}, Errors: ${d.errors}`);
+        toast({
+          title: "Import Complete",
+          description: `Imported ${d.inserted} medicines. Errors: ${d.errors}`,
+        });
+        setIsImporting(false);
+        return;
+      }
+    } catch (e) {
+      console.warn('Edge function import failed, falling back to client import.', e);
+    }
+
     try {
       // Normalize and transform the JSON data to match database schema
       const toTextArray = (v: any): string[] => {
