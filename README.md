@@ -428,18 +428,11 @@ This project is built with Lovable and uses the following open-source technologi
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📞 Support
-
-- **Documentation**: [Lovable Docs](https://docs.lovable.dev)
-- **Community**: [Lovable Discord](https://discord.com/channels/1119885301872070706/1280461670979993613)
-- **Issues**: Use GitHub Issues for bug reports
-
 ## 🔗 Links
 
-- **Live App**: [Your deployed URL]
-- **Lovable Project**: https://lovable.dev/projects/9399b379-6c9c-4e80-b03b-2316a4952722
-- **GitHub Repository**: [Your GitHub URL]
+- **Live App**: https://rxaegis-pill-check.vercel.app/
+- **GitHub Repository**: https://github.com/muskaanfayyaz/rxaegis-pill-check
 
 ---
 
-Built with ❤️ using [Lovable](https://lovable.dev)
+Built with ❤️ 
